@@ -1,12 +1,12 @@
 <script setup lang="ts">
-import { storeToRefs } from 'pinia'
-import { useNotesStore } from '../stores/notes'
-import { createEmptyNote } from '../utils/note'
-import { saveDraft } from '../composables/usePersistence'
+import { storeToRefs } from "pinia";
+import { useNotesStore } from "../stores/notes";
+import { createEmptyNote } from "../utils/note";
+import { saveDraft } from "../composables/usePersistence";
 
-const router = useRouter()
-const store = useNotesStore()
-const { notes } = storeToRefs(store)
+const router = useRouter();
+const store = useNotesStore();
+const { notes } = storeToRefs(store);
 const {
   isOpen: isConfirmOpen,
   title: confirmTitle,
@@ -16,54 +16,49 @@ const {
   danger: confirmDanger,
   confirm,
   handleConfirm,
-  handleCancel
-} = useConfirmDialog()
+  handleCancel,
+} = useConfirmDialog();
 
 onMounted(() => {
-  store.load()
-})
+  store.load();
+});
 
 const handleCreate = async (): Promise<void> => {
-  const note = createEmptyNote()
+  const note = createEmptyNote();
   saveDraft({
     noteId: note.id,
     draft: note,
-    isNew: true
-  })
-  await router.push(`/notes/${note.id}`)
-}
+    isNew: true,
+  });
+  await router.push(`/notes/${note.id}`);
+};
 
 const handleEdit = async (id: string): Promise<void> => {
-  await router.push(`/notes/${id}`)
-}
+  await router.push(`/notes/${id}`);
+};
 
 const handleDelete = async (id: string): Promise<void> => {
   const accepted = await confirm({
-    title: 'Удалить заметку?',
-    message: 'Это действие нельзя отменить.',
-    confirmLabel: 'Удалить',
-    cancelLabel: 'Отмена',
-    danger: true
-  })
+    title: "Удалить заметку?",
+    message: "Это действие нельзя отменить.",
+    confirmLabel: "Удалить",
+    cancelLabel: "Отмена",
+    danger: true,
+  });
 
   if (!accepted) {
-    return
+    return;
   }
 
-  store.deleteNote(id)
-}
+  store.deleteNote(id);
+};
 </script>
 
 <template>
   <div class="page">
     <header class="page__header">
-      <div>
-        <p class="page__eyebrow">Заметки</p>
-        <h1>Все заметки</h1>
-      </div>
-      <AppButton @click="handleCreate">
-        Создать заметку
-      </AppButton>
+      <h1>Все заметки</h1>
+      <AppButton @click="handleCreate"> Создать заметку </AppButton>
     </header>
 
     <main>
@@ -72,16 +67,10 @@ const handleDelete = async (id: string): Promise<void> => {
         title="Пока нет заметок"
         message="Создайте первую заметку, чтобы начать список дел."
       >
-        <AppButton @click="handleCreate">
-          Создать заметку
-        </AppButton>
+        <AppButton @click="handleCreate"> Создать заметку </AppButton>
       </EmptyState>
 
-      <section
-        v-else
-        class="notes-grid"
-        aria-label="Список заметок"
-      >
+      <section v-else class="notes-grid" aria-label="Список заметок">
         <NoteCard
           v-for="note in notes"
           :key="note.id"

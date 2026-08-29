@@ -16,8 +16,8 @@ withDefaults(defineProps<{
   <button
     class="app-button"
     :class="`app-button--${variant}`"
-    :type="type"
-    :disabled="disabled"
+    :type
+    :disabled
   >
     <slot />
   </button>
