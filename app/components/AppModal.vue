@@ -126,7 +126,7 @@ watch(
 
 .app-modal__dialog {
   position: relative;
-  min-width: 440px;
+  min-width: min(440px, 100%);
   padding: 24px;
   border-radius: var(--radius-lg);
   background: var(--color-surface);
