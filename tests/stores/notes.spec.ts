@@ -60,7 +60,6 @@ describe('notes store', () => {
     setActivePinia(createPinia())
     configureNotesStorage(adapter)
     const reloaded = useNotesStore()
-    reloaded.load()
 
     expect(reloaded.notes).toHaveLength(1)
     expect(reloaded.getNote('n1')?.title).toBe('Persisted')

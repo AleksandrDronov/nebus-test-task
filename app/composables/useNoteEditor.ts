@@ -415,7 +415,6 @@ export const useNoteEditor = (noteIdSource: MaybeRefOrGetter<string>) => {
     showRestoreDialog.value = false
     pendingRestore.value = null
     isReady.value = false
-    store.load()
     const id = noteId()
     const stored = store.getNote(id)
     const existingDraft = loadDraftForNote(id)

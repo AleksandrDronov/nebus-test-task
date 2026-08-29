@@ -24,6 +24,8 @@ export const useNotesStore = defineStore('notes', () => {
     notes.value = parseNotesPayload(notesAdapter.load())
   }
 
+  load()
+
   const getNote = (id: string): Note | undefined => {
     return notes.value.find((note) => note.id === id)
   }

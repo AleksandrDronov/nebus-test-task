@@ -19,10 +19,6 @@ const {
   handleCancel
 } = useConfirmDialog()
 
-onMounted(() => {
-  store.load()
-})
-
 const handleCreate = async (): Promise<void> => {
   const note = createEmptyNote()
   saveDraft({
