@@ -18,6 +18,16 @@ import { useDraftPersistence } from '~/composables/useDraftPersistence'
 import { useNoteValidation } from '~/composables/useNoteValidation'
 import { useCrossTabGuard } from '~/composables/useCrossTabGuard'
 
+/**
+ * Оркестратор редактора заметки.
+ *
+ * Собирает сессию, историю правок, автосохранение черновика, валидацию
+ * и защиту от удаления заметки в другой вкладке. Управляет жизненным циклом
+ * страницы редактора: persist при изменениях, сброс при смене id, горячие клавиши undo/redo.
+ *
+ * @param noteIdSource — id заметки (строка, ref или getter)
+ * @returns реактивное состояние редактора и обработчики действий
+ */
 export const useNoteEditor = (noteIdSource: MaybeRefOrGetter<string>) => {
   const store = useNotesStore()
   const session = useNoteSession(noteIdSource)

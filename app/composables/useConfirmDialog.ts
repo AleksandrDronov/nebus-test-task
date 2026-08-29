@@ -1,5 +1,6 @@
 import { ref } from 'vue'
 
+/** Содержимое и оформление модального подтверждения. */
 export type ConfirmOptions = {
   title: string
   message: string
@@ -22,6 +23,14 @@ const settle = (value: boolean): void => {
   resolveConfirm = null
 }
 
+/**
+ * Глобальный диалог подтверждения.
+ *
+ * Состояние общее для всех вызовов: новый `confirm` закрывает предыдущий
+ * как отмену. Резолвит промис в `true` при подтверждении и в `false` при отмене.
+ *
+ * @returns состояние диалога, `confirm` и обработчики кнопок
+ */
 export const useConfirmDialog = () => {
   const confirm = (options: ConfirmOptions): Promise<boolean> => {
     if (resolveConfirm) {

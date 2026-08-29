@@ -1,6 +1,14 @@
 import { ref } from 'vue'
 import type { PrepareNoteForSaveResult } from '~/utils/validation'
 
+/**
+ * Ошибки валидации формы редактора.
+ *
+ * Хранит ошибку заголовка и карту ошибок задач, заполняет их
+ * из результата `prepareNoteForSave` и сбрасывает при правках полей.
+ *
+ * @returns состояние ошибок и методы их применения/очистки
+ */
 export const useNoteValidation = () => {
   const titleError = ref('')
   const todoErrors = ref<Record<string, string>>({})

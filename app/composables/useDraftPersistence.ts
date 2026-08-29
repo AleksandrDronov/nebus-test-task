@@ -3,12 +3,21 @@ import { clearDraft, saveDraft } from '~/utils/persistence'
 
 const DRAFT_DEBOUNCE_MS = 400
 
+/** Данные черновика для записи в persistence. */
 export type DraftPersistPayload = {
   noteId: string
   draft: Note
   isNew: boolean
 }
 
+/**
+ * Отложенная запись черновика заметки.
+ *
+ * `persistSoon` дебаунсит сохранение, `persistNow` пишет сразу,
+ * `discard` снимает таймер и очищает сохранённый черновик.
+ *
+ * @returns методы записи, отмены таймера и удаления черновика
+ */
 export const useDraftPersistence = () => {
   let draftTimer: ReturnType<typeof setTimeout> | null = null
 

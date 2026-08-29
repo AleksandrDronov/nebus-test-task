@@ -4,6 +4,16 @@ import { cloneNote, createEmptyNote, notesContentEqual } from '~/utils/note'
 import { useNotesStore } from '~/stores/notes'
 import { clearDraft, loadDraftForNote } from '~/utils/persistence'
 
+/**
+ * Сессия редактирования заметки.
+ *
+ * Загружает оригинал из стора и черновик из persistence, определяет
+ * «новую» заметку, отсутствие записи и необходимость предложить восстановление.
+ * Переинициализируется при смене `noteIdSource`.
+ *
+ * @param noteIdSource — id заметки (строка, ref или getter)
+ * @returns состояние сессии и методы восстановления/сброса черновика
+ */
 export const useNoteSession = (noteIdSource: MaybeRefOrGetter<string>) => {
   const store = useNotesStore()
   const original = ref<Note | null>(null)

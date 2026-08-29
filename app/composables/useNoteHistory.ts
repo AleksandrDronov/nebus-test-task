@@ -6,10 +6,23 @@ import { nowIso } from '~/utils/id'
 
 const TEXT_DEBOUNCE_MS = 400
 
+/** Опции истории правок заметки. */
 type NoteHistoryOptions = {
+  /** Вызывается после каждого зафиксированного изменения черновика. */
   onChange?: () => void
 }
 
+/**
+ * История правок черновика заметки с undo/redo.
+ *
+ * Текстовые правки (заголовок и текст задачи) буферизуются и попадают
+ * в стек истории после паузы ввода. Структурные действия — добавление,
+ * удаление и переключение задачи — записываются сразу.
+ *
+ * @param draft — реактивный черновик заметки
+ * @param options.onChange — колбэк после изменения черновика
+ * @returns флаги undo/redo и обработчики правок
+ */
 export const useNoteHistory = (draft: Ref<Note | null>, options: NoteHistoryOptions = {}) => {
   const history = createHistoryManager()
   const canUndo = ref(false)

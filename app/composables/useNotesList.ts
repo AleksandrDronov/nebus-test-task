@@ -12,6 +12,14 @@ import {
 } from '~/utils/list-focus'
 import { useConfirmDialog } from '~/composables/useConfirmDialog'
 
+/**
+ * Список заметок на главной странице.
+ *
+ * Создаёт новую заметку через черновик и удаляет существующую
+ * с подтверждением и переносом фокуса на соседнюю карточку.
+ *
+ * @returns список заметок и обработчики создания/удаления
+ */
 export const useNotesList = () => {
   const router = useRouter()
   const store = useNotesStore()

@@ -4,6 +4,15 @@ import { confirmDialogConfig } from '~/config/confirmDialog'
 import { useConfirmDialog } from '~/composables/useConfirmDialog'
 import { useNoteEditor } from '~/composables/useNoteEditor'
 
+/**
+ * Страничный слой редактора заметки.
+ *
+ * Оборачивает `useNoteEditor`: диалоги подтверждения, восстановление черновика
+ * и навигация после сохранения, отмены, удаления или ухода со страницы.
+ *
+ * @param noteIdSource — id заметки (строка, ref или getter)
+ * @returns редактор и обработчики действий страницы
+ */
 export const useNoteEditorPage = (noteIdSource: MaybeRefOrGetter<string>) => {
   const editor = useNoteEditor(noteIdSource)
   const router = useRouter()
