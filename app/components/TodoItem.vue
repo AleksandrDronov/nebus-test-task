@@ -4,6 +4,7 @@ import type { Todo } from '../types/note'
 defineProps<{
   todo: Todo
   readonly?: boolean
+  error?: string
 }>()
 
 const emit = defineEmits<{
@@ -16,36 +17,55 @@ const emit = defineEmits<{
 
 <template>
   <li class="todo-item" :class="{ 'todo-item--completed': todo.completed }">
-    <AppCheckbox
-      :model-value="todo.completed"
-      :disabled="readonly"
-      :label="todo.text || 'Задача без названия'"
-      @update:model-value="emit('toggle')"
-    />
+    <div class="todo-item__row">
+      <AppCheckbox
+        :model-value="todo.completed"
+        :disabled="readonly"
+        :label="todo.text || 'Задача без названия'"
+        @update:model-value="emit('toggle')"
+      />
 
-    <input
-      v-if="!readonly"
-      class="todo-item__input"
-      type="text"
-      :value="todo.text"
-      :aria-label="'Текст задачи'"
-      placeholder="Текст задачи"
-      @input="emit('update-text', ($event.target as HTMLInputElement).value)"
-      @blur="emit('blur')"
-    />
+      <input
+        v-if="!readonly"
+        class="todo-item__input"
+        type="text"
+        :value="todo.text"
+        :aria-invalid="Boolean(error)"
+        :aria-describedby="error ? `todo-error-${todo.id}` : undefined"
+        :aria-label="'Текст задачи'"
+        placeholder="Текст задачи"
+        @input="emit('update-text', ($event.target as HTMLInputElement).value)"
+        @blur="emit('blur')"
+      />
 
-    <p v-else class="todo-item__text">
-      {{ todo.text || 'Пустая задача' }}
+      <p v-else class="todo-item__text">
+        {{ todo.text || 'Пустая задача' }}
+      </p>
+
+      <AppButton
+        v-if="!readonly"
+        variant="ghost"
+        aria-label="Удалить задачу"
+        @click="emit('remove')"
+      >
+        Удалить
+      </AppButton>
+    </div>
+
+    <p v-if="error" :id="`todo-error-${todo.id}`" class="todo-item__error" role="alert">
+      {{ error }}
     </p>
-
-    <AppButton v-if="!readonly" variant="ghost" aria-label="Удалить задачу" @click="emit('remove')">
-      Удалить
-    </AppButton>
   </li>
 </template>
 
 <style scoped lang="scss">
 .todo-item {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.todo-item__row {
   display: grid;
   grid-template-columns: 22px minmax(0, 1fr) auto;
   gap: 12px;
@@ -76,5 +96,14 @@ const emit = defineEmits<{
 .todo-item--completed .todo-item__text {
   color: var(--color-muted);
   text-decoration: line-through;
+}
+
+.todo-item__error {
+  margin: 0 0 0 34px;
+  color: var(--color-danger);
+}
+
+.todo-item__input[aria-invalid='true'] {
+  box-shadow: 0 1px 0 var(--color-danger);
 }
 </style>

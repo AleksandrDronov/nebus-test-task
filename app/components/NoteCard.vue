@@ -32,6 +32,7 @@ const previewTodos = computed(() => props.note.todos.slice(0, 3))
 <style scoped lang="scss">
 .note-card {
   display: flex;
+  height: 100%;
   flex-direction: column;
   gap: 16px;
   padding: 20px;

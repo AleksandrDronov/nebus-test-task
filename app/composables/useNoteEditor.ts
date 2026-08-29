@@ -32,6 +32,7 @@ export const useNoteEditor = (noteIdSource: MaybeRefOrGetter<string>) => {
   const notFound = ref(false)
   const deletedInOtherTab = ref(false)
   const titleError = ref('')
+  const todoErrors = ref<Record<string, string>>({})
   const saveBlockedMessage = ref('')
   const showRestoreDialog = ref(false)
   const pendingRestore = ref<Note | null>(null)
@@ -43,6 +44,12 @@ export const useNoteEditor = (noteIdSource: MaybeRefOrGetter<string>) => {
   let draftTimer: ReturnType<typeof setTimeout> | null = null
 
   const noteId = (): string => toValue(noteIdSource)
+
+  const clearTodoError = (todoId: string): void => {
+    todoErrors.value = Object.fromEntries(
+      Object.entries(todoErrors.value).filter(([id]) => id !== todoId)
+    )
+  }
 
   const isDirty = computed(() => {
     if (!draft.value || !original.value) {
@@ -175,6 +182,8 @@ export const useNoteEditor = (noteIdSource: MaybeRefOrGetter<string>) => {
       activeTodoId = todoId
     }
 
+    clearTodoError(todoId)
+
     const todo = draft.value.todos.find((item) => item.id === todoId)
 
     if (!todo) {
@@ -233,6 +242,8 @@ export const useNoteEditor = (noteIdSource: MaybeRefOrGetter<string>) => {
     if (index === -1 || !todo) {
       return
     }
+
+    clearTodoError(todoId)
 
     draft.value = history.execute(draft.value, {
       type: 'remove-todo',
@@ -311,6 +322,7 @@ export const useNoteEditor = (noteIdSource: MaybeRefOrGetter<string>) => {
 
     flushTextHistory()
     titleError.value = ''
+    todoErrors.value = {}
     saveBlockedMessage.value = ''
 
     store.load()
@@ -324,7 +336,14 @@ export const useNoteEditor = (noteIdSource: MaybeRefOrGetter<string>) => {
     const prepared = prepareNoteForSave(draft.value)
 
     if (!prepared.ok) {
-      titleError.value = prepared.error
+      if (prepared.field === 'title') {
+        titleError.value = prepared.error
+        return false
+      }
+
+      todoErrors.value = Object.fromEntries(
+        prepared.emptyTodoIds.map((todoId) => [todoId, prepared.error])
+      )
       return false
     }
 
@@ -391,6 +410,7 @@ export const useNoteEditor = (noteIdSource: MaybeRefOrGetter<string>) => {
     notFound.value = false
     deletedInOtherTab.value = false
     titleError.value = ''
+    todoErrors.value = {}
     saveBlockedMessage.value = ''
     showRestoreDialog.value = false
     pendingRestore.value = null
@@ -470,6 +490,7 @@ export const useNoteEditor = (noteIdSource: MaybeRefOrGetter<string>) => {
     notFound,
     deletedInOtherTab,
     titleError,
+    todoErrors,
     saveBlockedMessage,
     showRestoreDialog,
     isReady,

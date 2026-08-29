@@ -72,11 +72,7 @@ const handleDelete = async (id: string): Promise<void> => {
 
       <ul v-else class="notes-grid" aria-label="Список заметок">
         <li v-for="note in notes" :key="note.id">
-          <NoteCard
-            :note
-            @edit="handleEdit(note.id)"
-            @remove="handleDelete(note.id)"
-          />
+          <NoteCard :note @edit="handleEdit(note.id)" @remove="handleDelete(note.id)" />
         </li>
       </ul>
     </main>

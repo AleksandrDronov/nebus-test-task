@@ -43,8 +43,3 @@ export const notesContentEqual = (left: Note, right: Note): boolean => {
     )
   })
 }
-
-export const stripEmptyTodos = (note: Note): Note => ({
-  ...note,
-  todos: note.todos.filter((todo) => todo.text.trim().length > 0)
-})

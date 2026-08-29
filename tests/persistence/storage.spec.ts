@@ -2,7 +2,11 @@ import { describe, expect, it } from 'vitest'
 import { parseDraftPayload, parseNotesPayload } from '../../app/utils/storage'
 import { STORAGE_VERSION } from '../../app/types/storage'
 import { createEmptyNote } from '../../app/utils/note'
-import { prepareNoteForSave, TITLE_REQUIRED_MESSAGE } from '../../app/utils/validation'
+import {
+  prepareNoteForSave,
+  TITLE_REQUIRED_MESSAGE,
+  TODO_REQUIRED_MESSAGE
+} from '../../app/utils/validation'
 
 describe('persistence parsing', () => {
   it('accepts a valid payload', () => {
@@ -44,16 +48,45 @@ describe('validation', () => {
 
     if (!result.ok) {
       expect(result.error).toBe(TITLE_REQUIRED_MESSAGE)
+      expect(result.field).toBe('title')
     }
   })
 
-  it('strips empty todos on save', () => {
+  it('allows a note without todos', () => {
+    const note = createEmptyNote('n1')
+    note.title = 'Title'
+
+    const result = prepareNoteForSave(note)
+    expect(result.ok).toBe(true)
+
+    if (result.ok) {
+      expect(result.note.todos).toEqual([])
+    }
+  })
+
+  it('rejects empty and whitespace-only todos', () => {
+    const note = createEmptyNote('n1')
+    note.title = 'Title'
+    note.todos = [
+      { id: 't1', text: 'Keep', completed: false },
+      { id: 't2', text: '   ', completed: false },
+      { id: 't3', text: '', completed: false }
+    ]
+
+    const result = prepareNoteForSave(note)
+    expect(result.ok).toBe(false)
+
+    if (!result.ok) {
+      expect(result.error).toBe(TODO_REQUIRED_MESSAGE)
+      expect(result.field).toBe('todos')
+      expect(result.emptyTodoIds).toEqual(['t2', 't3'])
+    }
+  })
+
+  it('keeps filled todos and trims the title on save', () => {
     const note = createEmptyNote('n1')
     note.title = '  Title  '
-    note.todos = [
-      { id: 't1', text: '  Keep  ', completed: false },
-      { id: 't2', text: '   ', completed: false }
-    ]
+    note.todos = [{ id: 't1', text: '  Keep  ', completed: false }]
 
     const result = prepareNoteForSave(note)
     expect(result.ok).toBe(true)

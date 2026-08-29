@@ -65,10 +65,7 @@ const handleDelete = async (): Promise<void> => {
 
     <form v-else-if="editor.draft" class="editor__form" @submit.prevent="handleSave">
       <header class="editor__header">
-        <div>
-          <p class="editor__eyebrow">Редактор</p>
-          <h1>{{ editor.isNew ? 'Новая заметка' : 'Изменение заметки' }}</h1>
-        </div>
+        <h1>{{ editor.isNew ? 'Новая заметка' : 'Изменение заметки' }}</h1>
         <div class="editor__toolbar">
           <AppButton variant="ghost" :disabled="!editor.canUndo" type="button" @click="editor.undo">
             Отменить
@@ -103,6 +100,7 @@ const handleDelete = async (): Promise<void> => {
       <section aria-label="Задачи">
         <TodoList
           :todos="editor.draft.todos"
+          :errors="editor.todoErrors"
           @toggle="editor.toggleTodo"
           @update-text="editor.handleTodoTextInput"
           @blur="editor.handleTodoTextBlur"
@@ -115,7 +113,7 @@ const handleDelete = async (): Promise<void> => {
 
       <div class="editor__actions">
         <AppButton variant="secondary" type="button" @click="handleCancelEditing">
-          Отменить редактирование
+          {{ editor.isNew ? 'Отменить' : 'Отменить редактирование' }}
         </AppButton>
         <AppButton v-if="!editor.isNew" variant="danger" type="button" @click="handleDelete">
           Удалить
@@ -161,19 +159,6 @@ const handleDelete = async (): Promise<void> => {
   align-items: flex-end;
   margin-bottom: 24px;
   flex-wrap: wrap;
-}
-
-.editor__header h1,
-.editor__eyebrow {
-  margin: 0;
-}
-
-.editor__eyebrow {
-  color: var(--color-accent-strong);
-  font-weight: 700;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
-  font-size: 0.78rem;
 }
 
 .editor__toolbar,

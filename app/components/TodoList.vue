@@ -4,6 +4,7 @@ import type { Todo } from '../types/note'
 defineProps<{
   todos: Todo[]
   readonly?: boolean
+  errors?: Record<string, string>
 }>()
 
 const emit = defineEmits<{
@@ -21,6 +22,7 @@ const emit = defineEmits<{
       :key="todo.id"
       :todo="todo"
       :readonly="readonly"
+      :error="errors?.[todo.id]"
       @toggle="emit('toggle', todo.id)"
       @update-text="emit('update-text', todo.id, $event)"
       @blur="emit('blur', todo.id)"
