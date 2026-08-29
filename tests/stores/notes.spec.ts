@@ -1,10 +1,10 @@
 import { beforeEach, describe, expect, it } from 'vitest'
 import { createPinia, setActivePinia } from 'pinia'
-import { configureNotesStorage, useNotesStore } from '../../app/stores/notes'
-import { createMemoryAdapter, parseNotesPayload } from '../../app/utils/storage'
-import { createEmptyNote, createTodo } from '../../app/utils/note'
-import { STORAGE_VERSION } from '../../app/types/storage'
-import type { StoragePayload } from '../../app/types/storage'
+import { configureNotesStorage, useNotesStore } from '~/stores/notes'
+import { createMemoryAdapter, parseNotesPayload } from '~/utils/storage'
+import { createEmptyNote, createTodo } from '~/utils/note'
+import { STORAGE_VERSION } from '~/types/storage'
+import type { StoragePayload } from '~/types/storage'
 
 describe('notes store', () => {
   beforeEach(() => {

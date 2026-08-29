@@ -1,5 +1,5 @@
 import { computed, onMounted, onUnmounted, ref, type Ref } from 'vue'
-import { createHistoryManager } from '../utils/history'
+import { createHistoryManager } from '~/utils/history'
 
 export const useUndoRedo = <T>(apply: (current: T, next: T) => void) => {
   const history = createHistoryManager()

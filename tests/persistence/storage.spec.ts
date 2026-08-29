@@ -1,12 +1,12 @@
 import { describe, expect, it } from 'vitest'
-import { parseDraftPayload, parseNotesPayload } from '../../app/utils/storage'
-import { STORAGE_VERSION } from '../../app/types/storage'
-import { createEmptyNote } from '../../app/utils/note'
+import { parseDraftPayload, parseNotesPayload } from '~/utils/storage'
+import { STORAGE_VERSION } from '~/types/storage'
+import { createEmptyNote } from '~/utils/note'
 import {
   prepareNoteForSave,
   TITLE_REQUIRED_MESSAGE,
   TODO_REQUIRED_MESSAGE
-} from '../../app/utils/validation'
+} from '~/utils/validation'
 
 describe('persistence parsing', () => {
   it('accepts a valid payload', () => {

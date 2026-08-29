@@ -1,7 +1,7 @@
-import type { DraftPayload } from '../types/storage'
-import { DRAFT_STORAGE_KEY, STORAGE_VERSION } from '../types/storage'
-import { createLocalStorageAdapter, parseDraftPayload } from './storage'
-import { nowIso } from './id'
+import type { DraftPayload } from '~/types/storage'
+import { DRAFT_STORAGE_KEY, STORAGE_VERSION } from '~/types/storage'
+import { createLocalStorageAdapter, parseDraftPayload } from '~/utils/storage'
+import { nowIso } from '~/utils/id'
 
 const draftAdapter = createLocalStorageAdapter<DraftPayload>(DRAFT_STORAGE_KEY)
 

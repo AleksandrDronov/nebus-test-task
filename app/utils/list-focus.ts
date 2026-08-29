@@ -1,3 +1,9 @@
+export const CREATE_NOTE_BUTTON_ID = 'create-note-button'
+
+export const getNoteCardLinkId = (noteId: string): string => {
+  return `note-card-link-${noteId}`
+}
+
 export type FocusTargetAfterDelete =
   | {
       type: 'create'

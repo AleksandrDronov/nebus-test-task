@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { useConfirmDialog } from '../../app/composables/useConfirmDialog'
+import { useConfirmDialog } from '~/composables/useConfirmDialog'
 
 describe('useConfirmDialog', () => {
   it('shares one dialog instance between callers', async () => {

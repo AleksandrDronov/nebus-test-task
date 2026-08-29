@@ -9,15 +9,15 @@ import {
   type MaybeRefOrGetter
 } from 'vue'
 import { useRouter } from 'vue-router'
-import { NOTES_STORAGE_KEY } from '../types/storage'
-import type { Note } from '../types/note'
-import { cloneNote, createEmptyNote, createTodo, notesContentEqual } from '../utils/note'
-import { createHistoryManager, createTextHistoryBuffer } from '../utils/history'
-import { prepareNoteForSave } from '../utils/validation'
-import { nowIso } from '../utils/id'
-import { useNotesStore } from '../stores/notes'
-import { clearDraft, loadDraftForNote, saveDraft } from '../utils/persistence'
-import { isNativeTextTarget } from './useUndoRedo'
+import { NOTES_STORAGE_KEY } from '~/types/storage'
+import type { Note } from '~/types/note'
+import { cloneNote, createEmptyNote, createTodo, notesContentEqual } from '~/utils/note'
+import { createHistoryManager, createTextHistoryBuffer } from '~/utils/history'
+import { prepareNoteForSave } from '~/utils/validation'
+import { nowIso } from '~/utils/id'
+import { useNotesStore } from '~/stores/notes'
+import { clearDraft, loadDraftForNote, saveDraft } from '~/utils/persistence'
+import { isNativeTextTarget } from '~/composables/useUndoRedo'
 
 const DRAFT_DEBOUNCE_MS = 400
 const TEXT_DEBOUNCE_MS = 400

@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { getFocusTargetAfterDelete } from '../../app/utils/list-focus'
+import { getFocusTargetAfterDelete } from '~/utils/list-focus'
 
 describe('getFocusTargetAfterDelete', () => {
   it('returns the create action when the last note is removed', () => {

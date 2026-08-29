@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import type { Note } from '../types/note'
+import type { Note } from '~/types/note'
+import { getNoteCardLinkId } from '~/utils/list-focus'
 
 const props = defineProps<{
   note: Note
@@ -16,7 +17,7 @@ const displayTitle = computed(() => props.note.title || 'Без названия
 <template>
   <article class="note-card">
     <h2 class="note-card__title">
-      <NuxtLink :id="`note-card-link-${note.id}`" :to="`/notes/${note.id}`" class="note-card__link">
+      <NuxtLink :id="getNoteCardLinkId(note.id)" :to="`/notes/${note.id}`" class="note-card__link">
         <span class="note-card__title-text">{{ displayTitle }}</span>
       </NuxtLink>
     </h2>

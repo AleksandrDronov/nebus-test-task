@@ -1,4 +1,4 @@
-import type { Todo } from './note'
+import type { Todo } from '~/types/note'
 
 export const HISTORY_LIMIT = 50
 

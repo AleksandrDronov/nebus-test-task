@@ -4,9 +4,9 @@ import {
   createHistoryManager,
   createTextHistoryBuffer,
   HISTORY_LIMIT
-} from '../../app/utils/history'
-import { createEmptyNote, createTodo } from '../../app/utils/note'
-import type { HistoryOperation } from '../../app/types/history'
+} from '~/utils/history'
+import { createEmptyNote, createTodo } from '~/utils/note'
+import type { HistoryOperation } from '~/types/history'
 
 const noteWithTodo = () => {
   const todo = createTodo('Buy milk')

@@ -1,10 +1,10 @@
 import { ref } from 'vue'
 import { defineStore } from 'pinia'
-import type { Note } from '../types/note'
-import type { StorageAdapter, StoragePayload } from '../types/storage'
-import { NOTES_STORAGE_KEY, STORAGE_VERSION } from '../types/storage'
-import { nowIso } from '../utils/id'
-import { parseNotesPayload, createLocalStorageAdapter, toStoragePayload } from '../utils/storage'
+import type { Note } from '~/types/note'
+import type { StorageAdapter, StoragePayload } from '~/types/storage'
+import { NOTES_STORAGE_KEY, STORAGE_VERSION } from '~/types/storage'
+import { nowIso } from '~/utils/id'
+import { parseNotesPayload, createLocalStorageAdapter, toStoragePayload } from '~/utils/storage'
 
 const sortNotesByUpdatedAtDesc = (items: Note[]): Note[] => {
   return [...items].sort((left, right) => right.updatedAt.localeCompare(left.updatedAt))

@@ -1,4 +1,4 @@
-import type { Note } from './note'
+import type { Note } from '~/types/note'
 
 export const STORAGE_VERSION = 1
 export const NOTES_STORAGE_KEY = 'notes-spa:notes'

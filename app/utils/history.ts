@@ -1,6 +1,6 @@
-import type { Note } from '../types/note'
-import type { HistoryOperation } from '../types/history'
-import { HISTORY_LIMIT } from '../types/history'
+import type { Note } from '~/types/note'
+import type { HistoryOperation } from '~/types/history'
+import { HISTORY_LIMIT } from '~/types/history'
 
 export { HISTORY_LIMIT }
 

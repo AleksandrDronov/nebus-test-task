@@ -1,12 +1,12 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { createPinia, setActivePinia } from 'pinia'
-import { useNotesList } from '../../app/composables/useNotesList'
-import { useConfirmDialog } from '../../app/composables/useConfirmDialog'
-import { configureNotesStorage, useNotesStore } from '../../app/stores/notes'
-import { createMemoryAdapter } from '../../app/utils/storage'
-import { createEmptyNote } from '../../app/utils/note'
-import { saveDraft } from '../../app/utils/persistence'
-import type { StoragePayload } from '../../app/types/storage'
+import { useNotesList } from '~/composables/useNotesList'
+import { useConfirmDialog } from '~/composables/useConfirmDialog'
+import { configureNotesStorage, useNotesStore } from '~/stores/notes'
+import { createMemoryAdapter } from '~/utils/storage'
+import { createEmptyNote } from '~/utils/note'
+import { saveDraft } from '~/utils/persistence'
+import type { StoragePayload } from '~/types/storage'
 
 const push = vi.fn()
 
@@ -16,7 +16,7 @@ vi.mock('vue-router', () => ({
   })
 }))
 
-vi.mock('../../app/utils/persistence', () => ({
+vi.mock('~/utils/persistence', () => ({
   saveDraft: vi.fn()
 }))
 

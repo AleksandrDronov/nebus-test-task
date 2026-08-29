@@ -1,5 +1,5 @@
-import type { Note, Todo } from '../types/note'
-import { createId, nowIso } from './id'
+import type { Note, Todo } from '~/types/note'
+import { createId, nowIso } from '~/utils/id'
 
 export const createEmptyNote = (id: string = createId()): Note => {
   const timestamp = nowIso()

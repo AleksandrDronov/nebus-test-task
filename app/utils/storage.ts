@@ -1,6 +1,6 @@
-import type { Note, Todo } from '../types/note'
-import type { DraftPayload, StorageAdapter, StoragePayload } from '../types/storage'
-import { STORAGE_VERSION } from '../types/storage'
+import type { Note, Todo } from '~/types/note'
+import type { DraftPayload, StorageAdapter, StoragePayload } from '~/types/storage'
+import { STORAGE_VERSION } from '~/types/storage'
 
 const isRecord = (value: unknown): value is Record<string, unknown> => {
   return typeof value === 'object' && value !== null

@@ -1,4 +1,4 @@
-import type { Note } from '../types/note'
+import type { Note } from '~/types/note'
 
 export const TITLE_REQUIRED_MESSAGE = 'Название заметки не может быть пустым.'
 export const TODO_REQUIRED_MESSAGE = 'Текст задачи не может быть пустым.'
