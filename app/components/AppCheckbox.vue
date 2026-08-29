@@ -18,6 +18,15 @@ const handleChange = (event: Event): void => {
   const target = event.target as HTMLInputElement
   emit('update:modelValue', target.checked)
 }
+
+const handleKeydown = (event: KeyboardEvent): void => {
+  if (props.disabled || event.key !== 'Enter') {
+    return
+  }
+
+  event.preventDefault()
+  emit('update:modelValue', !props.modelValue)
+}
 </script>
 
 <template>
@@ -28,6 +37,7 @@ const handleChange = (event: Event): void => {
     :disabled="disabled"
     :aria-label="label"
     @change="handleChange"
+    @keydown="handleKeydown"
   />
 </template>
 

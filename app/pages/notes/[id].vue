@@ -25,13 +25,23 @@ const handleCancelEditing = async (): Promise<void> => {
     return
   }
 
-  const accepted = await confirm({
-    title: 'Отменить редактирование?',
-    message: 'Все несохранённые изменения будут потеряны.',
-    confirmLabel: 'Отменить изменения',
-    cancelLabel: 'Продолжить редактирование',
-    danger: true
-  })
+  const accepted = await confirm(
+    editor.isNew
+      ? {
+          title: 'Отменить создание?',
+          message: 'Новая заметка не будет сохранена.',
+          confirmLabel: 'Отменить создание',
+          cancelLabel: 'Продолжить создание',
+          danger: true
+        }
+      : {
+          title: 'Отменить редактирование?',
+          message: 'Все несохранённые изменения будут потеряны.',
+          confirmLabel: 'Отменить изменения',
+          cancelLabel: 'Продолжить редактирование',
+          danger: true
+        }
+  )
 
   if (accepted) {
     await editor.cancel(true)

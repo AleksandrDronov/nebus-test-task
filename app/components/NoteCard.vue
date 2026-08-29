@@ -57,6 +57,7 @@ const previewTodos = computed(() => props.note.todos.slice(0, 3))
 
 .note-card__actions {
   display: flex;
+  justify-content: flex-end;
   gap: 8px;
   flex-wrap: wrap;
   margin-top: auto;
