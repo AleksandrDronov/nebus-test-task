@@ -1,0 +1,67 @@
+@use 'variables' as *;
+
+:root {
+  --color-bg: #{$color-bg};
+  --color-surface: #{$color-surface};
+  --color-ink: #{$color-ink};
+  --color-muted: #{$color-muted};
+  --color-line: #{$color-line};
+  --color-accent: #{$color-accent};
+  --color-accent-strong: #{$color-accent-strong};
+  --color-danger: #{$color-danger};
+  --color-danger-strong: #{$color-danger-strong};
+  --color-focus: #{$color-focus};
+  --radius-sm: #{$radius-sm};
+  --radius-md: #{$radius-md};
+  --radius-lg: #{$radius-lg};
+  --shadow: #{$shadow};
+  --font-sans: 'Segoe UI', system-ui, -apple-system, sans-serif;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  min-height: 100%;
+  background: var(--color-bg);
+  color: var(--color-ink);
+  font-family: var(--font-sans);
+}
+
+body {
+  background-image:
+    radial-gradient(circle at top left, rgba(196, 92, 38, 0.08), transparent 28rem),
+    radial-gradient(circle at top right, rgba(15, 110, 98, 0.1), transparent 24rem);
+}
+
+button,
+input,
+textarea {
+  font: inherit;
+}
+
+button:focus-visible,
+input:focus-visible,
+a:focus-visible,
+[tabindex]:focus-visible {
+  outline: 2px solid var(--color-focus);
+  outline-offset: 2px;
+}
+
+.app-shell {
+  width: min(1080px, calc(100% - 32px));
+  margin: 0 auto;
+  padding: 32px 0 64px;
+}
+
+@media (max-width: 720px) {
+  .app-shell {
+    width: min(1080px, calc(100% - 20px));
+    padding: 20px 0 48px;
+  }
+}

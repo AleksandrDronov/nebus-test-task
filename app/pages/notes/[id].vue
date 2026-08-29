@@ -1,0 +1,297 @@
+<script setup lang="ts">
+const route = useRoute()
+const noteId = computed(() => String(route.params.id ?? ''))
+
+const editor = useNoteEditor(noteId)
+const {
+  isOpen: isConfirmOpen,
+  title: confirmTitle,
+  message: confirmMessage,
+  confirmLabel,
+  cancelLabel,
+  danger: confirmDanger,
+  confirm,
+  handleConfirm,
+  handleCancel
+} = useConfirmDialog()
+
+const handleSave = async (): Promise<void> => {
+  await editor.save()
+}
+
+const handleCancelEditing = async (): Promise<void> => {
+  if (!editor.isDirty) {
+    await editor.cancel(true)
+    return
+  }
+
+  const accepted = await confirm({
+    title: 'Отменить редактирование?',
+    message: 'Все несохранённые изменения будут потеряны.',
+    confirmLabel: 'Отменить изменения',
+    cancelLabel: 'Продолжить редактирование',
+    danger: true
+  })
+
+  if (accepted) {
+    await editor.cancel(true)
+  }
+}
+
+const handleDelete = async (): Promise<void> => {
+  const accepted = await confirm({
+    title: 'Удалить заметку?',
+    message: 'Это действие нельзя отменить.',
+    confirmLabel: 'Удалить',
+    cancelLabel: 'Отмена',
+    danger: true
+  })
+
+  if (accepted) {
+    await editor.removeNote()
+  }
+}
+</script>
+
+<template>
+  <div class="editor">
+    <EmptyState
+      v-if="editor.isReady && editor.notFound"
+      title="Заметка не найдена"
+      message="Такой заметки нет, либо она была удалена."
+    >
+      <AppButton @click="navigateTo('/')">
+        Вернуться к заметкам
+      </AppButton>
+    </EmptyState>
+
+    <form
+      v-else-if="editor.draft"
+      class="editor__form"
+      @submit.prevent="handleSave"
+    >
+      <header class="editor__header">
+        <div>
+          <p class="editor__eyebrow">Редактор</p>
+          <h1>{{ editor.isNew ? 'Новая заметка' : 'Изменение заметки' }}</h1>
+        </div>
+        <div class="editor__toolbar">
+          <AppButton
+            variant="ghost"
+            :disabled="!editor.canUndo"
+            type="button"
+            @click="editor.undo"
+          >
+            Отменить
+          </AppButton>
+          <AppButton
+            variant="ghost"
+            :disabled="!editor.canRedo"
+            type="button"
+            @click="editor.redo"
+          >
+            Повторить
+          </AppButton>
+        </div>
+      </header>
+
+      <p
+        v-if="editor.saveBlockedMessage"
+        class="editor__alert"
+        role="alert"
+      >
+        {{ editor.saveBlockedMessage }}
+      </p>
+
+      <label class="editor__title-field">
+        <span>Название</span>
+        <input
+          class="editor__title-input"
+          type="text"
+          :value="editor.draft.title"
+          :aria-invalid="Boolean(editor.titleError)"
+          aria-describedby="title-error"
+          placeholder="Название заметки"
+          @input="editor.handleTitleInput(($event.target as HTMLInputElement).value)"
+          @blur="editor.handleTitleBlur"
+        >
+      </label>
+      <p
+        v-if="editor.titleError"
+        id="title-error"
+        class="editor__error"
+        role="alert"
+      >
+        {{ editor.titleError }}
+      </p>
+
+      <section aria-label="Задачи">
+        <TodoList
+          :todos="editor.draft.todos"
+          @toggle="editor.toggleTodo"
+          @update-text="editor.handleTodoTextInput"
+          @blur="editor.handleTodoTextBlur"
+          @remove="editor.removeTodo"
+        />
+        <AppButton
+          class="editor__add"
+          variant="secondary"
+          type="button"
+          @click="editor.addTodo"
+        >
+          Добавить задачу
+        </AppButton>
+      </section>
+
+      <div class="editor__actions">
+        <AppButton
+          variant="secondary"
+          type="button"
+          @click="handleCancelEditing"
+        >
+          Отменить редактирование
+        </AppButton>
+        <AppButton
+          v-if="!editor.isNew"
+          variant="danger"
+          type="button"
+          @click="handleDelete"
+        >
+          Удалить
+        </AppButton>
+        <AppButton
+          type="submit"
+          :disabled="Boolean(editor.saveBlockedMessage)"
+        >
+          Сохранить
+        </AppButton>
+      </div>
+
+      <p
+        v-if="editor.saveBlockedMessage"
+        class="editor__back"
+      >
+        <NuxtLink to="/">
+          Вернуться к списку
+        </NuxtLink>
+      </p>
+    </form>
+
+    <ConfirmDialog
+      :open="isConfirmOpen"
+      :title="confirmTitle"
+      :message="confirmMessage"
+      :confirm-label="confirmLabel"
+      :cancel-label="cancelLabel"
+      :danger="confirmDanger"
+      @confirm="handleConfirm"
+      @cancel="handleCancel"
+    />
+
+    <ConfirmDialog
+      :open="editor.showRestoreDialog"
+      title="Найдено незавершённое редактирование."
+      message="Восстановить черновик?"
+      confirm-label="Восстановить"
+      cancel-label="Отказаться"
+      @confirm="editor.restoreDraftChoice(true)"
+      @cancel="editor.restoreDraftChoice(false)"
+    />
+  </div>
+</template>
+
+
+<style scoped lang="scss">
+.editor__header {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  align-items: flex-end;
+  margin-bottom: 24px;
+  flex-wrap: wrap;
+}
+
+.editor__header h1,
+.editor__eyebrow {
+  margin: 0;
+}
+
+.editor__eyebrow {
+  color: var(--color-accent-strong);
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  font-size: 0.78rem;
+}
+
+.editor__toolbar,
+.editor__actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.editor__form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 24px;
+  background: var(--color-surface);
+  border: 1px solid var(--color-line);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow);
+}
+
+.editor__title-field {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  font-weight: 600;
+}
+
+.editor__title-input {
+  width: 100%;
+  min-height: 48px;
+  padding: 0 12px;
+  border: 1px solid var(--color-line);
+  border-radius: var(--radius-sm);
+  background: #fff;
+}
+
+.editor__error,
+.editor__alert {
+  margin: 0;
+  color: var(--color-danger);
+}
+
+.editor__add {
+  margin-top: 12px;
+}
+
+.editor__actions {
+  justify-content: flex-end;
+  padding-top: 8px;
+}
+
+.editor__back-link {
+  text-decoration: none;
+}
+
+.editor__back a {
+  color: var(--color-accent-strong);
+}
+
+@media (max-width: 720px) {
+  .editor__form {
+    padding: 16px;
+  }
+
+  .editor__actions {
+    justify-content: stretch;
+  }
+
+  .editor__actions :deep(.app-button) {
+    flex: 1;
+  }
+}
+</style>
