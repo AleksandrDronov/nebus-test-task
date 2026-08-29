@@ -86,23 +86,25 @@ watch(
 
 <template>
   <Teleport to="body">
-    <div v-if="open" class="app-modal">
-      <div class="app-modal__backdrop" @click="emit('close')" />
-      <div
-        ref="dialogRef"
-        class="app-modal__dialog"
-        role="dialog"
-        aria-modal="true"
-        :aria-labelledby="titleDomId"
-        tabindex="-1"
-        @keydown="handleKeydown"
-      >
-        <h2 :id="titleDomId" class="app-modal__title">
-          {{ title }}
-        </h2>
-        <slot />
+    <Transition name="app-modal" appear>
+      <div v-if="open" class="app-modal">
+        <div class="app-modal__backdrop" @click="emit('close')" />
+        <div
+          ref="dialogRef"
+          class="app-modal__dialog"
+          role="dialog"
+          aria-modal="true"
+          :aria-labelledby="titleDomId"
+          tabindex="-1"
+          @keydown="handleKeydown"
+        >
+          <h2 :id="titleDomId" class="app-modal__title">
+            {{ title }}
+          </h2>
+          <slot />
+        </div>
       </div>
-    </div>
+    </Transition>
   </Teleport>
 </template>
 
@@ -134,5 +136,41 @@ watch(
 .app-modal__title {
   margin: 0 0 12px;
   font-size: 1.25rem;
+}
+
+.app-modal-enter-active {
+  transition: opacity 0.22s ease-out;
+
+  .app-modal__dialog {
+    transition: transform 0.22s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+}
+
+.app-modal-leave-active {
+  transition: opacity 0.18s ease-in;
+
+  .app-modal__dialog {
+    transition: transform 0.18s ease-in;
+  }
+}
+
+.app-modal-enter-from,
+.app-modal-leave-to {
+  opacity: 0;
+
+  .app-modal__dialog {
+    transform: translateY(12px) scale(0.96);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .app-modal-enter-active,
+  .app-modal-leave-active {
+    transition: none;
+
+    .app-modal__dialog {
+      transition: none;
+    }
+  }
 }
 </style>
