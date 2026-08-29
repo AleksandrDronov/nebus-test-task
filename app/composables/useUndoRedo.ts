@@ -1,4 +1,4 @@
-import { computed, onMounted, onUnmounted, ref, type Ref } from 'vue'
+import { computed, getCurrentInstance, onMounted, onUnmounted, ref, type Ref } from 'vue'
 import { createHistoryManager } from '~/utils/history'
 
 export const useUndoRedo = <T>(apply: (current: T, next: T) => void) => {
@@ -57,6 +57,10 @@ export const useHistoryShortcuts = (options: {
     }
 
     options.undo()
+  }
+
+  if (!getCurrentInstance()) {
+    return
   }
 
   onMounted(() => {

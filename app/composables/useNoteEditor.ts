@@ -1,510 +1,211 @@
 import {
   computed,
+  getCurrentInstance,
   onMounted,
   onUnmounted,
   reactive,
-  ref,
   toValue,
   watch,
   type MaybeRefOrGetter
 } from 'vue'
-import { useRouter } from 'vue-router'
-import { NOTES_STORAGE_KEY } from '~/types/storage'
-import type { Note } from '~/types/note'
-import { cloneNote, createEmptyNote, createTodo, notesContentEqual } from '~/utils/note'
-import { createHistoryManager, createTextHistoryBuffer } from '~/utils/history'
-import { prepareNoteForSave } from '~/utils/validation'
-import { nowIso } from '~/utils/id'
+import type { EditorSaveResult, EditorView } from '~/types/editor'
 import { useNotesStore } from '~/stores/notes'
-import { clearDraft, loadDraftForNote, saveDraft } from '~/utils/persistence'
-import { isNativeTextTarget } from '~/composables/useUndoRedo'
-
-const DRAFT_DEBOUNCE_MS = 400
-const TEXT_DEBOUNCE_MS = 400
+import { prepareNoteForSave } from '~/utils/validation'
+import { useHistoryShortcuts } from '~/composables/useUndoRedo'
+import { useNoteSession } from '~/composables/useNoteSession'
+import { useNoteHistory } from '~/composables/useNoteHistory'
+import { useDraftPersistence } from '~/composables/useDraftPersistence'
+import { useNoteValidation } from '~/composables/useNoteValidation'
+import { useCrossTabGuard } from '~/composables/useCrossTabGuard'
 
 export const useNoteEditor = (noteIdSource: MaybeRefOrGetter<string>) => {
   const store = useNotesStore()
-  const router = useRouter()
+  const session = useNoteSession(noteIdSource)
+  const persistence = useDraftPersistence()
+  const validation = useNoteValidation()
+  const guard = useCrossTabGuard(() => toValue(noteIdSource), session.isNew)
 
-  const original = ref<Note | null>(null)
-  const draft = ref<Note | null>(null)
-  const isNew = ref(false)
-  const notFound = ref(false)
-  const deletedInOtherTab = ref(false)
-  const titleError = ref('')
-  const todoErrors = ref<Record<string, string>>({})
-  const saveBlockedMessage = ref('')
-  const showRestoreDialog = ref(false)
-  const pendingRestore = ref<Note | null>(null)
-  const isReady = ref(false)
-  const canUndo = ref(false)
-  const canRedo = ref(false)
-
-  const history = createHistoryManager()
-  let draftTimer: ReturnType<typeof setTimeout> | null = null
-
-  const noteId = (): string => toValue(noteIdSource)
-
-  const clearTodoError = (todoId: string): void => {
-    todoErrors.value = Object.fromEntries(
-      Object.entries(todoErrors.value).filter(([id]) => id !== todoId)
-    )
-  }
-
-  const isDirty = computed(() => {
-    if (!draft.value || !original.value) {
-      return false
+  const persistIfPossible = (): void => {
+    if (!session.draft.value || session.notFound.value) {
+      return
     }
 
-    return !notesContentEqual(draft.value, original.value)
+    persistence.persistSoon({
+      noteId: toValue(noteIdSource),
+      draft: session.draft.value,
+      isNew: session.isNew.value
+    })
+  }
+
+  const persistNowIfPossible = (): void => {
+    if (!session.draft.value || session.notFound.value) {
+      return
+    }
+
+    persistence.persistNow({
+      noteId: toValue(noteIdSource),
+      draft: session.draft.value,
+      isNew: session.isNew.value
+    })
+  }
+
+  const history = useNoteHistory(session.draft, {
+    onChange: persistIfPossible
   })
 
-  const syncFlags = (): void => {
-    canUndo.value = history.canUndo()
-    canRedo.value = history.canRedo()
-  }
-
-  const persistDraftSoon = (): void => {
-    if (!draft.value || notFound.value) {
-      return
+  const view = computed<EditorView>(() => {
+    if (!session.isReady.value) {
+      return 'loading'
     }
 
-    if (draftTimer) {
-      clearTimeout(draftTimer)
+    if (session.notFound.value) {
+      return 'not-found'
     }
 
-    draftTimer = setTimeout(() => {
-      if (!draft.value) {
-        return
-      }
-
-      saveDraft({
-        noteId: noteId(),
-        draft: draft.value,
-        isNew: isNew.value
-      })
-    }, DRAFT_DEBOUNCE_MS)
-  }
-
-  const persistDraftNow = (): void => {
-    if (draftTimer) {
-      clearTimeout(draftTimer)
-      draftTimer = null
+    if (guard.saveBlockedMessage.value) {
+      return 'blocked'
     }
 
-    if (!draft.value || notFound.value) {
-      return
+    if (session.draft.value) {
+      return 'editing'
     }
 
-    saveDraft({
-      noteId: noteId(),
-      draft: draft.value,
-      isNew: isNew.value
-    })
-  }
+    return 'loading'
+  })
 
   const discardSession = (): void => {
-    if (draftTimer) {
-      clearTimeout(draftTimer)
-      draftTimer = null
-    }
-
-    titleBuffer.cancel()
-    todoTextBuffer.cancel()
-    history.clear()
-    syncFlags()
-    clearDraft()
-  }
-
-  const titleBuffer = createTextHistoryBuffer((before, after) => {
-    if (!draft.value) {
-      return
-    }
-
-    draft.value = history.execute(draft.value, {
-      type: 'set-title',
-      before,
-      after
-    })
-    syncFlags()
-    persistDraftSoon()
-  }, TEXT_DEBOUNCE_MS)
-
-  const todoTextBuffer = createTextHistoryBuffer((before, after) => {
-    if (!draft.value || !activeTodoId) {
-      return
-    }
-
-    draft.value = history.execute(draft.value, {
-      type: 'set-todo-text',
-      todoId: activeTodoId,
-      before,
-      after
-    })
-    syncFlags()
-    persistDraftSoon()
-  }, TEXT_DEBOUNCE_MS)
-
-  let activeTodoId: string | null = null
-
-  const flushTextHistory = (): void => {
-    titleBuffer.flush()
-    todoTextBuffer.flush()
+    history.reset()
+    persistence.discard()
+    session.resetDraftToOriginal()
+    validation.reset()
   }
 
   const handleTitleInput = (value: string): void => {
-    if (!draft.value) {
-      return
-    }
-
-    titleError.value = ''
-    const previous = draft.value.title
-    draft.value = {
-      ...draft.value,
-      title: value,
-      updatedAt: nowIso()
-    }
-    titleBuffer.change(previous, value)
-    persistDraftSoon()
-  }
-
-  const handleTitleBlur = (): void => {
-    titleBuffer.flush()
+    validation.clearTitleError()
+    history.handleTitleInput(value)
   }
 
   const handleTodoTextInput = (todoId: string, value: string): void => {
-    if (!draft.value) {
-      return
-    }
-
-    if (activeTodoId !== todoId) {
-      todoTextBuffer.flush()
-      activeTodoId = todoId
-    }
-
-    clearTodoError(todoId)
-
-    const todo = draft.value.todos.find((item) => item.id === todoId)
-
-    if (!todo) {
-      return
-    }
-
-    const previous = todo.text
-    draft.value = {
-      ...draft.value,
-      todos: draft.value.todos.map((item) => {
-        if (item.id !== todoId) {
-          return item
-        }
-
-        return {
-          ...item,
-          text: value
-        }
-      }),
-      updatedAt: nowIso()
-    }
-    todoTextBuffer.change(previous, value)
-    persistDraftSoon()
+    validation.clearTodoError(todoId)
+    history.handleTodoTextInput(todoId, value)
   }
 
-  const handleTodoTextBlur = (): void => {
-    todoTextBuffer.flush()
-    activeTodoId = null
+  const handleRemoveTodo = (todoId: string): void => {
+    validation.clearTodoError(todoId)
+    history.removeTodo(todoId)
   }
 
-  const addTodo = (): void => {
-    if (!draft.value) {
-      return
+  const save = async (): Promise<EditorSaveResult> => {
+    if (!session.draft.value) {
+      return 'invalid'
     }
 
-    flushTextHistory()
-    const todo = createTodo()
-    draft.value = history.execute(draft.value, {
-      type: 'add-todo',
-      todo,
-      index: draft.value.todos.length
-    })
-    syncFlags()
-    persistDraftSoon()
-  }
+    history.flushTextHistory()
+    validation.reset()
+    guard.reset()
 
-  const removeTodo = (todoId: string): void => {
-    if (!draft.value) {
-      return
+    if (guard.checkDeleted()) {
+      return 'blocked'
     }
 
-    flushTextHistory()
-    const index = draft.value.todos.findIndex((item) => item.id === todoId)
-    const todo = draft.value.todos[index]
-
-    if (index === -1 || !todo) {
-      return
-    }
-
-    clearTodoError(todoId)
-
-    draft.value = history.execute(draft.value, {
-      type: 'remove-todo',
-      todo,
-      index
-    })
-    syncFlags()
-    persistDraftSoon()
-  }
-
-  const toggleTodo = (todoId: string): void => {
-    if (!draft.value) {
-      return
-    }
-
-    flushTextHistory()
-    const todo = draft.value.todos.find((item) => item.id === todoId)
-
-    if (!todo) {
-      return
-    }
-
-    draft.value = history.execute(draft.value, {
-      type: 'toggle-todo',
-      todoId,
-      before: todo.completed,
-      after: !todo.completed
-    })
-    syncFlags()
-    persistDraftSoon()
-  }
-
-  const undo = (): void => {
-    if (!draft.value || !history.canUndo()) {
-      return
-    }
-
-    flushTextHistory()
-    draft.value = history.undo(draft.value)
-    syncFlags()
-    persistDraftSoon()
-  }
-
-  const redo = (): void => {
-    if (!draft.value || !history.canRedo()) {
-      return
-    }
-
-    flushTextHistory()
-    draft.value = history.redo(draft.value)
-    syncFlags()
-    persistDraftSoon()
-  }
-
-  const restoreDraftChoice = (restore: boolean): void => {
-    showRestoreDialog.value = false
-
-    if (restore && pendingRestore.value) {
-      draft.value = cloneNote(pendingRestore.value)
-    } else if (!restore) {
-      clearDraft()
-
-      if (original.value) {
-        draft.value = cloneNote(original.value)
-      }
-    }
-
-    pendingRestore.value = null
-    persistDraftNow()
-  }
-
-  const save = async (): Promise<void> => {
-    if (!draft.value) {
-      return
-    }
-
-    flushTextHistory()
-    titleError.value = ''
-    todoErrors.value = {}
-    saveBlockedMessage.value = ''
-
-    store.load()
-
-    if (deletedInOtherTab.value || (!isNew.value && !store.getNote(noteId()))) {
-      deletedInOtherTab.value = true
-      saveBlockedMessage.value = 'Заметка была удалена в другой вкладке. Сохранение невозможно.'
-      return
-    }
-
-    const prepared = prepareNoteForSave(draft.value)
+    const prepared = prepareNoteForSave(session.draft.value)
 
     if (!prepared.ok) {
-      if (prepared.field === 'title') {
-        titleError.value = prepared.error
-        return
-      }
-
-      todoErrors.value = Object.fromEntries(
-        prepared.emptyTodoIds.map((todoId) => [todoId, prepared.error])
-      )
-      return
+      validation.applyPrepareResult(prepared)
+      return 'invalid'
     }
 
     store.saveNote(prepared.note)
     discardSession()
-    await router.push('/')
+    return 'saved'
   }
 
-  const cancel = async (confirmed: boolean): Promise<void> => {
-    flushTextHistory()
-
-    if (!confirmed && isDirty.value) {
-      return
-    }
-
+  const discard = (): void => {
+    history.flushTextHistory()
     discardSession()
-    await router.push('/')
   }
 
-  const removeNote = async (): Promise<void> => {
-    flushTextHistory()
-    store.deleteNote(noteId())
+  const removeNote = (): void => {
+    history.flushTextHistory()
+    store.deleteNote(toValue(noteIdSource))
     discardSession()
-    await router.push('/')
   }
 
-  const handleStorage = (event: StorageEvent): void => {
-    if (event.key !== NOTES_STORAGE_KEY) {
-      return
-    }
-
-    store.load()
-
-    if (!isNew.value && !store.getNote(noteId())) {
-      deletedInOtherTab.value = true
-      saveBlockedMessage.value = 'Заметка была удалена в другой вкладке. Сохранение невозможно.'
-    }
+  const restoreDraft = (restore: boolean): void => {
+    session.restoreDraft(restore)
+    persistNowIfPossible()
   }
 
-  const handleKeydown = (event: KeyboardEvent): void => {
-    const modifier = event.metaKey || event.ctrlKey
-
-    if (!modifier || event.altKey || event.key.toLowerCase() !== 'z') {
+  const bindWindowListeners = (): void => {
+    if (typeof window === 'undefined') {
       return
     }
 
-    if (isNativeTextTarget(event.target)) {
-      return
-    }
-
-    event.preventDefault()
-
-    if (event.shiftKey) {
-      redo()
-      return
-    }
-
-    undo()
+    window.addEventListener('storage', guard.handleStorage)
   }
 
-  const initialize = (): void => {
-    notFound.value = false
-    deletedInOtherTab.value = false
-    titleError.value = ''
-    todoErrors.value = {}
-    saveBlockedMessage.value = ''
-    showRestoreDialog.value = false
-    pendingRestore.value = null
-    isReady.value = false
-    const id = noteId()
-    const stored = store.getNote(id)
-    const existingDraft = loadDraftForNote(id)
-
-    if (stored) {
-      original.value = cloneNote(stored)
-      isNew.value = false
-
-      if (existingDraft && !notesContentEqual(existingDraft.draft, stored)) {
-        pendingRestore.value = existingDraft.draft
-        showRestoreDialog.value = true
-        draft.value = cloneNote(stored)
-      } else {
-        draft.value = cloneNote(stored)
-      }
-
-      isReady.value = true
+  const unbindWindowListeners = (): void => {
+    if (typeof window === 'undefined') {
       return
     }
 
-    if (existingDraft?.isNew) {
-      isNew.value = true
-      original.value = createEmptyNote(id)
-
-      if (!notesContentEqual(existingDraft.draft, original.value)) {
-        pendingRestore.value = existingDraft.draft
-        showRestoreDialog.value = true
-        draft.value = cloneNote(original.value)
-      } else {
-        draft.value = cloneNote(existingDraft.draft)
-      }
-
-      isReady.value = true
-      return
-    }
-
-    notFound.value = true
-    isReady.value = true
+    window.removeEventListener('storage', guard.handleStorage)
   }
 
-  onMounted(() => {
-    initialize()
-    window.addEventListener('storage', handleStorage)
-    window.addEventListener('keydown', handleKeydown)
-  })
+  if (getCurrentInstance()) {
+    onMounted(() => {
+      bindWindowListeners()
+    })
 
-  onUnmounted(() => {
-    if (draftTimer) {
-      clearTimeout(draftTimer)
-    }
+    onUnmounted(() => {
+      persistence.cancelPending()
+      history.reset()
+      unbindWindowListeners()
+    })
+  }
 
-    titleBuffer.cancel()
-    todoTextBuffer.cancel()
-    window.removeEventListener('storage', handleStorage)
-    window.removeEventListener('keydown', handleKeydown)
+  useHistoryShortcuts({
+    undo: history.undo,
+    redo: history.redo,
+    enabled: computed(() => Boolean(session.draft.value))
   })
 
   watch(
     () => toValue(noteIdSource),
     () => {
-      history.clear()
-      syncFlags()
-      initialize()
+      history.reset()
+      validation.reset()
+      guard.reset()
     }
   )
 
   return reactive({
-    draft,
-    original,
-    isNew,
-    isDirty,
-    notFound,
-    deletedInOtherTab,
-    titleError,
-    todoErrors,
-    saveBlockedMessage,
-    showRestoreDialog,
-    isReady,
-    canUndo,
-    canRedo,
+    view,
+    draft: session.draft,
+    original: session.original,
+    isNew: session.isNew,
+    isDirty: session.isDirty,
+    notFound: session.notFound,
+    deletedInOtherTab: guard.deletedInOtherTab,
+    titleError: validation.titleError,
+    todoErrors: validation.todoErrors,
+    saveBlockedMessage: guard.saveBlockedMessage,
+    needsRestore: session.needsRestore,
+    isReady: session.isReady,
+    canUndo: history.canUndo,
+    canRedo: history.canRedo,
     handleTitleInput,
-    handleTitleBlur,
+    handleTitleBlur: history.handleTitleBlur,
     handleTodoTextInput,
-    handleTodoTextBlur,
-    addTodo,
-    removeTodo,
-    toggleTodo,
-    undo,
-    redo,
+    handleTodoTextBlur: history.handleTodoTextBlur,
+    addTodo: history.addTodo,
+    removeTodo: handleRemoveTodo,
+    toggleTodo: history.toggleTodo,
+    undo: history.undo,
+    redo: history.redo,
     save,
-    cancel,
+    discard,
     removeNote,
-    restoreDraftChoice
+    restoreDraft
   })
 }
