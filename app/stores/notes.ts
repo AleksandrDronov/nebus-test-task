@@ -6,6 +6,10 @@ import { NOTES_STORAGE_KEY, STORAGE_VERSION } from '../types/storage'
 import { nowIso } from '../utils/id'
 import { parseNotesPayload, createLocalStorageAdapter, toStoragePayload } from '../utils/storage'
 
+const sortNotesByUpdatedAtDesc = (items: Note[]): Note[] => {
+  return [...items].sort((left, right) => right.updatedAt.localeCompare(left.updatedAt))
+}
+
 let notesAdapter: StorageAdapter<StoragePayload> =
   createLocalStorageAdapter<StoragePayload>(NOTES_STORAGE_KEY)
 
@@ -21,7 +25,7 @@ export const useNotesStore = defineStore('notes', () => {
   }
 
   const load = (): void => {
-    notes.value = parseNotesPayload(notesAdapter.load())
+    notes.value = sortNotesByUpdatedAtDesc(parseNotesPayload(notesAdapter.load()))
   }
 
   load()
@@ -38,11 +42,11 @@ export const useNotesStore = defineStore('notes', () => {
     }
 
     if (index === -1) {
-      notes.value = [...notes.value, next]
+      notes.value = sortNotesByUpdatedAtDesc([...notes.value, next])
     } else {
       const copy = [...notes.value]
       copy[index] = next
-      notes.value = copy
+      notes.value = sortNotesByUpdatedAtDesc(copy)
     }
 
     persist()

@@ -3,17 +3,7 @@ const route = useRoute()
 const noteId = computed(() => String(route.params.id ?? ''))
 
 const editor = useNoteEditor(noteId)
-const {
-  isOpen: isConfirmOpen,
-  title: confirmTitle,
-  message: confirmMessage,
-  confirmLabel,
-  cancelLabel,
-  danger: confirmDanger,
-  confirm,
-  handleConfirm,
-  handleCancel
-} = useConfirmDialog()
+const { confirm } = useConfirmDialog()
 
 const handleSave = async (): Promise<void> => {
   await editor.save()
@@ -70,19 +60,15 @@ const handleDelete = async (): Promise<void> => {
       title="Заметка не найдена"
       message="Такой заметки нет, либо она была удалена."
     >
-      <AppButton @click="navigateTo('/')"> Вернуться к заметкам </AppButton>
+      <AppButton @click="navigateTo('/')">Вернуться к заметкам</AppButton>
     </EmptyState>
 
     <form v-else-if="editor.draft" class="editor__form" @submit.prevent="handleSave">
       <header class="editor__header">
         <h1>{{ editor.isNew ? 'Новая заметка' : 'Изменение заметки' }}</h1>
         <div class="editor__toolbar">
-          <AppButton variant="ghost" :disabled="!editor.canUndo" type="button" @click="editor.undo">
-            Отменить
-          </AppButton>
-          <AppButton variant="ghost" :disabled="!editor.canRedo" type="button" @click="editor.redo">
-            Повторить
-          </AppButton>
+          <AppButton variant="ghost" :disabled="!editor.canUndo" type="button" @click="editor.undo">Отменить</AppButton>
+          <AppButton variant="ghost" :disabled="!editor.canRedo" type="button" @click="editor.redo">Повторить</AppButton>
         </div>
       </header>
 
@@ -116,38 +102,19 @@ const handleDelete = async (): Promise<void> => {
           @blur="editor.handleTodoTextBlur"
           @remove="editor.removeTodo"
         />
-        <AppButton class="editor__add" variant="secondary" type="button" @click="editor.addTodo">
-          Добавить задачу
-        </AppButton>
+        <AppButton class="editor__add" variant="secondary" type="button" @click="editor.addTodo">Добавить задачу</AppButton>
       </section>
 
       <div class="editor__actions">
-        <AppButton variant="secondary" type="button" @click="handleCancelEditing">
-          {{ editor.isNew ? 'Отменить' : 'Отменить редактирование' }}
-        </AppButton>
-        <AppButton v-if="!editor.isNew" variant="danger" type="button" @click="handleDelete">
-          Удалить
-        </AppButton>
-        <AppButton type="submit" :disabled="Boolean(editor.saveBlockedMessage)">
-          Сохранить
-        </AppButton>
+        <AppButton variant="secondary" type="button" @click="handleCancelEditing">{{ editor.isNew ? 'Отменить' : 'Отменить редактирование' }}</AppButton>
+        <AppButton v-if="!editor.isNew" variant="danger" type="button" @click="handleDelete">Удалить</AppButton>
+        <AppButton type="submit" :disabled="Boolean(editor.saveBlockedMessage)">Сохранить</AppButton>
       </div>
 
       <p v-if="editor.saveBlockedMessage" class="editor__back">
-        <NuxtLink to="/"> Вернуться к списку </NuxtLink>
+        <NuxtLink to="/">Вернуться к списку</NuxtLink>
       </p>
     </form>
-
-    <ConfirmDialog
-      :open="isConfirmOpen"
-      :title="confirmTitle"
-      :message="confirmMessage"
-      :confirm-label="confirmLabel"
-      :cancel-label="cancelLabel"
-      :danger="confirmDanger"
-      @confirm="handleConfirm"
-      @cancel="handleCancel"
-    />
 
     <ConfirmDialog
       :open="editor.showRestoreDialog"

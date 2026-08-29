@@ -6,31 +6,33 @@ const props = defineProps<{
 }>()
 
 const emit = defineEmits<{
-  edit: []
   remove: []
 }>()
 
 const previewTodos = computed(() => props.note.todos.slice(0, 3))
+const displayTitle = computed(() => props.note.title || 'Без названия')
 </script>
 
 <template>
   <article class="note-card">
     <h2 class="note-card__title">
-      {{ note.title || 'Без названия' }}
+      <NuxtLink :id="`note-card-link-${note.id}`" :to="`/notes/${note.id}`" class="note-card__link">
+        <span class="note-card__title-text">{{ displayTitle }}</span>
+      </NuxtLink>
     </h2>
 
     <TodoList v-if="previewTodos.length > 0" :todos="previewTodos" readonly />
     <p v-else class="note-card__empty">Нет задач</p>
 
     <div class="note-card__actions">
-      <AppButton variant="secondary" @click="emit('edit')"> Изменить </AppButton>
-      <AppButton variant="danger" @click="emit('remove')"> Удалить </AppButton>
+      <AppButton variant="danger" @click="emit('remove')">Удалить</AppButton>
     </div>
   </article>
 </template>
 
 <style scoped lang="scss">
 .note-card {
+  position: relative;
   display: flex;
   height: 100%;
   flex-direction: column;
@@ -40,11 +42,36 @@ const previewTodos = computed(() => props.note.todos.slice(0, 3))
   border: 1px solid var(--color-line);
   border-radius: var(--radius-md);
   box-shadow: var(--shadow);
+  transition: border-color 0.15s ease;
+}
+
+.note-card__link {
+  color: inherit;
+  text-decoration: none;
+}
+
+.note-card__link::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  border-radius: inherit;
+}
+
+.note-card__link:hover .note-card__title-text {
+  text-decoration: underline;
+}
+
+.note-card__link:hover::after {
+  border-color: var(--color-accent);
 }
 
 .note-card__title {
-  margin: 0;
   font-size: 1.2rem;
+}
+
+.note-card__title-text {
+  display: block;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -54,12 +81,10 @@ const previewTodos = computed(() => props.note.todos.slice(0, 3))
   margin: 0;
   color: var(--color-muted);
 }
-
 .note-card__actions {
-  display: flex;
-  justify-content: flex-end;
-  gap: 8px;
-  flex-wrap: wrap;
+  z-index: 1;
+  width: fit-content;
   margin-top: auto;
+  margin-left: auto;
 }
 </style>

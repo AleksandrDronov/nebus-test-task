@@ -107,4 +107,33 @@ describe('notes store', () => {
     expect(store.deleteNote('n1')).toBe(false)
     expect(store.getNote('n1')).toBeUndefined()
   })
+
+  it('lists notes by updatedAt descending', () => {
+    const adapter = createMemoryAdapter<StoragePayload>()
+    adapter.save({
+      version: STORAGE_VERSION,
+      notes: [
+        { ...createEmptyNote('old'), title: 'Old', updatedAt: '2026-01-01T00:00:00.000Z' },
+        { ...createEmptyNote('new'), title: 'New', updatedAt: '2026-08-01T00:00:00.000Z' }
+      ]
+    })
+    configureNotesStorage(adapter)
+    const store = useNotesStore()
+
+    expect(store.notes.map((note) => note.id)).toEqual(['new', 'old'])
+  })
+
+  it('puts a newly saved note first', () => {
+    const adapter = createMemoryAdapter<StoragePayload>()
+    adapter.save({
+      version: STORAGE_VERSION,
+      notes: [{ ...createEmptyNote('old'), updatedAt: '2020-01-01T00:00:00.000Z' }]
+    })
+    configureNotesStorage(adapter)
+    const store = useNotesStore()
+
+    store.saveNote(createEmptyNote('fresh'))
+
+    expect(store.notes[0]?.id).toBe('fresh')
+  })
 })

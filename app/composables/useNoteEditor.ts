@@ -16,7 +16,7 @@ import { createHistoryManager, createTextHistoryBuffer } from '../utils/history'
 import { prepareNoteForSave } from '../utils/validation'
 import { nowIso } from '../utils/id'
 import { useNotesStore } from '../stores/notes'
-import { clearDraft, loadDraftForNote, saveDraft } from './usePersistence'
+import { clearDraft, loadDraftForNote, saveDraft } from '../utils/persistence'
 import { isNativeTextTarget } from './useUndoRedo'
 
 const DRAFT_DEBOUNCE_MS = 400

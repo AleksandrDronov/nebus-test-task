@@ -1,23 +1,8 @@
 <script setup lang="ts">
-import { storeToRefs } from 'pinia'
-import { useNotesStore } from '../stores/notes'
-import { createEmptyNote } from '../utils/note'
-import { saveDraft } from '../composables/usePersistence'
-
 const router = useRouter()
 const store = useNotesStore()
 const { notes } = storeToRefs(store)
-const {
-  isOpen: isConfirmOpen,
-  title: confirmTitle,
-  message: confirmMessage,
-  confirmLabel,
-  cancelLabel,
-  danger: confirmDanger,
-  confirm,
-  handleConfirm,
-  handleCancel
-} = useConfirmDialog()
+const { confirm } = useConfirmDialog()
 
 const handleCreate = async (): Promise<void> => {
   const note = createEmptyNote()
@@ -29,11 +14,12 @@ const handleCreate = async (): Promise<void> => {
   await router.push(`/notes/${note.id}`)
 }
 
-const handleEdit = async (id: string): Promise<void> => {
-  await router.push(`/notes/${id}`)
-}
-
 const handleDelete = async (id: string): Promise<void> => {
+  const focusTarget = getFocusTargetAfterDelete(
+    notes.value.map((note) => note.id),
+    id
+  )
+
   const accepted = await confirm({
     title: 'Удалить заметку?',
     message: 'Это действие нельзя отменить.',
@@ -47,6 +33,14 @@ const handleDelete = async (id: string): Promise<void> => {
   }
 
   store.deleteNote(id)
+  await nextTick()
+
+  if (focusTarget.type === 'create') {
+    document.getElementById('create-note-button')?.focus()
+    return
+  }
+
+  document.getElementById(`note-card-link-${focusTarget.id}`)?.focus()
 }
 </script>
 
@@ -54,7 +48,7 @@ const handleDelete = async (id: string): Promise<void> => {
   <div class="page">
     <header class="page__header">
       <h1>Все заметки</h1>
-      <AppButton @click="handleCreate"> Создать заметку </AppButton>
+      <AppButton v-if="notes.length > 0" id="create-note-button" @click="handleCreate">Создать заметку</AppButton>
     </header>
 
     <main>
@@ -63,26 +57,15 @@ const handleDelete = async (id: string): Promise<void> => {
         title="Пока нет заметок"
         message="Создайте первую заметку, чтобы начать список дел."
       >
-        <AppButton @click="handleCreate"> Создать заметку </AppButton>
+        <AppButton id="create-note-button" @click="handleCreate">Создать заметку</AppButton>
       </EmptyState>
 
       <ul v-else class="notes-grid" aria-label="Список заметок">
         <li v-for="note in notes" :key="note.id">
-          <NoteCard :note @edit="handleEdit(note.id)" @remove="handleDelete(note.id)" />
+          <NoteCard :note @remove="handleDelete(note.id)" />
         </li>
       </ul>
     </main>
-
-    <ConfirmDialog
-      :open="isConfirmOpen"
-      :title="confirmTitle"
-      :message="confirmMessage"
-      :confirm-label="confirmLabel"
-      :cancel-label="cancelLabel"
-      :danger="confirmDanger"
-      @confirm="handleConfirm"
-      @cancel="handleCancel"
-    />
   </div>
 </template>
 

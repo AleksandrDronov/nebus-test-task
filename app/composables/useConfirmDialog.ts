@@ -8,16 +8,27 @@ export type ConfirmOptions = {
   danger?: boolean
 }
 
-export const useConfirmDialog = () => {
-  const isOpen = ref(false)
-  const title = ref('')
-  const message = ref('')
-  const confirmLabel = ref('OK')
-  const cancelLabel = ref('Отмена')
-  const danger = ref(false)
-  let resolveConfirm: ((value: boolean) => void) | null = null
+const isOpen = ref(false)
+const title = ref('')
+const message = ref('')
+const confirmLabel = ref('OK')
+const cancelLabel = ref('Отмена')
+const danger = ref(false)
+let resolveConfirm: ((value: boolean) => void) | null = null
 
+const settle = (value: boolean): void => {
+  isOpen.value = false
+  resolveConfirm?.(value)
+  resolveConfirm = null
+}
+
+export const useConfirmDialog = () => {
   const confirm = (options: ConfirmOptions): Promise<boolean> => {
+    if (resolveConfirm) {
+      resolveConfirm(false)
+      resolveConfirm = null
+    }
+
     title.value = options.title
     message.value = options.message
     confirmLabel.value = options.confirmLabel
@@ -31,15 +42,11 @@ export const useConfirmDialog = () => {
   }
 
   const handleConfirm = (): void => {
-    isOpen.value = false
-    resolveConfirm?.(true)
-    resolveConfirm = null
+    settle(true)
   }
 
   const handleCancel = (): void => {
-    isOpen.value = false
-    resolveConfirm?.(false)
-    resolveConfirm = null
+    settle(false)
   }
 
   return {
