@@ -7,6 +7,10 @@ export default defineNuxtConfig({
     strict: true
   },
   app: {
+    pageTransition: {
+      name: 'page',
+      mode: 'out-in'
+    },
     head: {
       title: 'Заметки',
       htmlAttrs: {
