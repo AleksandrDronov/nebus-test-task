@@ -315,9 +315,9 @@ export const useNoteEditor = (noteIdSource: MaybeRefOrGetter<string>) => {
     persistDraftNow()
   }
 
-  const save = async (): Promise<boolean> => {
+  const save = async (): Promise<void> => {
     if (!draft.value) {
-      return false
+      return
     }
 
     flushTextHistory()
@@ -330,7 +330,7 @@ export const useNoteEditor = (noteIdSource: MaybeRefOrGetter<string>) => {
     if (deletedInOtherTab.value || (!isNew.value && !store.getNote(noteId()))) {
       deletedInOtherTab.value = true
       saveBlockedMessage.value = 'Заметка была удалена в другой вкладке. Сохранение невозможно.'
-      return false
+      return
     }
 
     const prepared = prepareNoteForSave(draft.value)
@@ -338,31 +338,29 @@ export const useNoteEditor = (noteIdSource: MaybeRefOrGetter<string>) => {
     if (!prepared.ok) {
       if (prepared.field === 'title') {
         titleError.value = prepared.error
-        return false
+        return
       }
 
       todoErrors.value = Object.fromEntries(
         prepared.emptyTodoIds.map((todoId) => [todoId, prepared.error])
       )
-      return false
+      return
     }
 
     store.saveNote(prepared.note)
     discardSession()
     await router.push('/')
-    return true
   }
 
-  const cancel = async (confirmed: boolean): Promise<boolean> => {
+  const cancel = async (confirmed: boolean): Promise<void> => {
     flushTextHistory()
 
     if (!confirmed && isDirty.value) {
-      return false
+      return
     }
 
     discardSession()
     await router.push('/')
-    return true
   }
 
   const removeNote = async (): Promise<void> => {
