@@ -1,0 +1,12 @@
+node_modules
+.nuxt
+.output
+.data
+.cache
+.git
+.npm-cache
+*.log
+.DS_Store
+docs
+Frontend Implementation Specification.md
+ТЗ Frontend.pdf
