@@ -1,5 +1,10 @@
-import { describe, expect, it, vi, beforeEach } from 'vitest'
-import { applyOperation, createHistoryManager, createTextHistoryBuffer, HISTORY_LIMIT } from '../../app/utils/history'
+import { describe, expect, it, vi } from 'vitest'
+import {
+  applyOperation,
+  createHistoryManager,
+  createTextHistoryBuffer,
+  HISTORY_LIMIT
+} from '../../app/utils/history'
 import { createEmptyNote, createTodo } from '../../app/utils/note'
 import type { HistoryOperation } from '../../app/types/history'
 
@@ -185,8 +190,8 @@ describe('history manager', () => {
 
   it('clears history', () => {
     const history = createHistoryManager()
-    let note = createEmptyNote('note-1')
-    note = history.execute(note, { type: 'set-title', before: '', after: 'A' })
+    const note = createEmptyNote('note-1')
+    history.execute(note, { type: 'set-title', before: '', after: 'A' })
     history.clear()
 
     expect(history.canUndo()).toBe(false)

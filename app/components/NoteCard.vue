@@ -19,31 +19,12 @@ const previewTodos = computed(() => props.note.todos.slice(0, 3))
       {{ note.title || 'Без названия' }}
     </h2>
 
-    <TodoList
-      v-if="previewTodos.length > 0"
-      :todos="previewTodos"
-      readonly
-    />
-    <p
-      v-else
-      class="note-card__empty"
-    >
-      Нет задач
-    </p>
+    <TodoList v-if="previewTodos.length > 0" :todos="previewTodos" readonly />
+    <p v-else class="note-card__empty">Нет задач</p>
 
     <div class="note-card__actions">
-      <AppButton
-        variant="secondary"
-        @click="emit('edit')"
-      >
-        Изменить
-      </AppButton>
-      <AppButton
-        variant="danger"
-        @click="emit('remove')"
-      >
-        Удалить
-      </AppButton>
+      <AppButton variant="secondary" @click="emit('edit')"> Изменить </AppButton>
+      <AppButton variant="danger" @click="emit('remove')"> Удалить </AppButton>
     </div>
   </article>
 </template>

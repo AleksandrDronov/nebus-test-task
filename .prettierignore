@@ -1,0 +1,11 @@
+.nuxt
+.output
+.data
+.nitro
+.cache
+dist
+node_modules
+coverage
+package-lock.json
+Frontend Implementation Specification.md
+docs

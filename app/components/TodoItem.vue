@@ -15,10 +15,7 @@ const emit = defineEmits<{
 </script>
 
 <template>
-  <li
-    class="todo-item"
-    :class="{ 'todo-item--completed': todo.completed }"
-  >
+  <li class="todo-item" :class="{ 'todo-item--completed': todo.completed }">
     <AppCheckbox
       :model-value="todo.completed"
       :disabled="readonly"
@@ -35,21 +32,13 @@ const emit = defineEmits<{
       placeholder="Текст задачи"
       @input="emit('update-text', ($event.target as HTMLInputElement).value)"
       @blur="emit('blur')"
-    >
+    />
 
-    <p
-      v-else
-      class="todo-item__text"
-    >
+    <p v-else class="todo-item__text">
       {{ todo.text || 'Пустая задача' }}
     </p>
 
-    <AppButton
-      v-if="!readonly"
-      variant="ghost"
-      aria-label="Удалить задачу"
-      @click="emit('remove')"
-    >
+    <AppButton v-if="!readonly" variant="ghost" aria-label="Удалить задачу" @click="emit('remove')">
       Удалить
     </AppButton>
   </li>

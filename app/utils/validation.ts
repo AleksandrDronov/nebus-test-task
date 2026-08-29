@@ -5,7 +5,7 @@ export const TITLE_REQUIRED_MESSAGE = 'Название заметки не мо
 
 export const prepareNoteForSave = (
   note: Note
-): { ok: true, note: Note } | { ok: false, error: string } => {
+): { ok: true; note: Note } | { ok: false; error: string } => {
   const title = note.title.trim()
 
   if (title.length === 0) {

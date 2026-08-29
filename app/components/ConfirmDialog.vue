@@ -15,26 +15,15 @@ const emit = defineEmits<{
 </script>
 
 <template>
-  <AppModal
-    :open="open"
-    :title="title"
-    @close="emit('cancel')"
-  >
+  <AppModal :open="open" :title="title" @close="emit('cancel')">
     <p class="confirm-dialog__message">
       {{ message }}
     </p>
     <div class="confirm-dialog__actions">
-      <AppButton
-        variant="secondary"
-        data-autofocus
-        @click="emit('cancel')"
-      >
+      <AppButton variant="secondary" data-autofocus @click="emit('cancel')">
         {{ cancelLabel }}
       </AppButton>
-      <AppButton
-        :variant="danger ? 'danger' : 'primary'"
-        @click="emit('confirm')"
-      >
+      <AppButton :variant="danger ? 'danger' : 'primary'" @click="emit('confirm')">
         {{ confirmLabel }}
       </AppButton>
     </div>

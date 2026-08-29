@@ -26,6 +26,8 @@ npx serve .output/public -s
 ```bash
 npm run test
 npm run typecheck
+npm run lint
+npm run format:check
 npm run generate
 ```
 

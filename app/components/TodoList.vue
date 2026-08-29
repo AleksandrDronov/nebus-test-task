@@ -15,10 +15,7 @@ const emit = defineEmits<{
 </script>
 
 <template>
-  <ul
-    class="todo-list"
-    :aria-label="readonly ? 'Предпросмотр задач' : 'Список задач'"
-  >
+  <ul class="todo-list" :aria-label="readonly ? 'Предпросмотр задач' : 'Список задач'">
     <TodoItem
       v-for="todo in todos"
       :key="todo.id"

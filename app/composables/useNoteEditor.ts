@@ -1,4 +1,13 @@
-import { computed, onMounted, onUnmounted, reactive, ref, toValue, watch, type MaybeRefOrGetter } from 'vue'
+import {
+  computed,
+  onMounted,
+  onUnmounted,
+  reactive,
+  ref,
+  toValue,
+  watch,
+  type MaybeRefOrGetter
+} from 'vue'
 import { useRouter } from 'vue-router'
 import { NOTES_STORAGE_KEY } from '../types/storage'
 import type { Note } from '../types/note'

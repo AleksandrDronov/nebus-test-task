@@ -28,7 +28,7 @@ const handleChange = (event: Event): void => {
     :disabled="disabled"
     :aria-label="label"
     @change="handleChange"
-  >
+  />
 </template>
 
 <style scoped lang="scss">

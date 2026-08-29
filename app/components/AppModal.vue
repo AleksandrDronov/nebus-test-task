@@ -1,5 +1,6 @@
 <script setup lang="ts">
-const FOCUSABLE_SELECTOR = 'a[href], button:not([disabled]), textarea:not([disabled]), input:not([disabled]), select:not([disabled]), [tabindex]:not([tabindex="-1"])'
+const FOCUSABLE_SELECTOR =
+  'a[href], button:not([disabled]), textarea:not([disabled]), input:not([disabled]), select:not([disabled]), [tabindex]:not([tabindex="-1"])'
 
 const props = defineProps<{
   open: boolean
@@ -21,9 +22,11 @@ const getFocusable = (): HTMLElement[] => {
     return []
   }
 
-  return [...dialogRef.value.querySelectorAll<HTMLElement>(FOCUSABLE_SELECTOR)].filter((element) => {
-    return element.tabIndex !== -1 && !element.hasAttribute('disabled')
-  })
+  return [...dialogRef.value.querySelectorAll<HTMLElement>(FOCUSABLE_SELECTOR)].filter(
+    (element) => {
+      return element.tabIndex !== -1 && !element.hasAttribute('disabled')
+    }
+  )
 }
 
 const handleKeydown = (event: KeyboardEvent): void => {
@@ -67,9 +70,7 @@ watch(
   () => props.open,
   async (open) => {
     if (open) {
-      previousFocus = document.activeElement instanceof HTMLElement
-        ? document.activeElement
-        : null
+      previousFocus = document.activeElement instanceof HTMLElement ? document.activeElement : null
       await nextTick()
       const autofocus = dialogRef.value?.querySelector<HTMLElement>('[data-autofocus]')
       const fallback = getFocusable()[0]
@@ -85,14 +86,8 @@ watch(
 
 <template>
   <Teleport to="body">
-    <div
-      v-if="open"
-      class="app-modal"
-    >
-      <div
-        class="app-modal__backdrop"
-        @click="emit('close')"
-      />
+    <div v-if="open" class="app-modal">
+      <div class="app-modal__backdrop" @click="emit('close')" />
       <div
         ref="dialogRef"
         class="app-modal__dialog"
@@ -102,10 +97,7 @@ watch(
         tabindex="-1"
         @keydown="handleKeydown"
       >
-        <h2
-          :id="titleDomId"
-          class="app-modal__title"
-        >
+        <h2 :id="titleDomId" class="app-modal__title">
           {{ title }}
         </h2>
         <slot />

@@ -60,46 +60,26 @@ const handleDelete = async (): Promise<void> => {
       title="Заметка не найдена"
       message="Такой заметки нет, либо она была удалена."
     >
-      <AppButton @click="navigateTo('/')">
-        Вернуться к заметкам
-      </AppButton>
+      <AppButton @click="navigateTo('/')"> Вернуться к заметкам </AppButton>
     </EmptyState>
 
-    <form
-      v-else-if="editor.draft"
-      class="editor__form"
-      @submit.prevent="handleSave"
-    >
+    <form v-else-if="editor.draft" class="editor__form" @submit.prevent="handleSave">
       <header class="editor__header">
         <div>
           <p class="editor__eyebrow">Редактор</p>
           <h1>{{ editor.isNew ? 'Новая заметка' : 'Изменение заметки' }}</h1>
         </div>
         <div class="editor__toolbar">
-          <AppButton
-            variant="ghost"
-            :disabled="!editor.canUndo"
-            type="button"
-            @click="editor.undo"
-          >
+          <AppButton variant="ghost" :disabled="!editor.canUndo" type="button" @click="editor.undo">
             Отменить
           </AppButton>
-          <AppButton
-            variant="ghost"
-            :disabled="!editor.canRedo"
-            type="button"
-            @click="editor.redo"
-          >
+          <AppButton variant="ghost" :disabled="!editor.canRedo" type="button" @click="editor.redo">
             Повторить
           </AppButton>
         </div>
       </header>
 
-      <p
-        v-if="editor.saveBlockedMessage"
-        class="editor__alert"
-        role="alert"
-      >
+      <p v-if="editor.saveBlockedMessage" class="editor__alert" role="alert">
         {{ editor.saveBlockedMessage }}
       </p>
 
@@ -114,14 +94,9 @@ const handleDelete = async (): Promise<void> => {
           placeholder="Название заметки"
           @input="editor.handleTitleInput(($event.target as HTMLInputElement).value)"
           @blur="editor.handleTitleBlur"
-        >
+        />
       </label>
-      <p
-        v-if="editor.titleError"
-        id="title-error"
-        class="editor__error"
-        role="alert"
-      >
+      <p v-if="editor.titleError" id="title-error" class="editor__error" role="alert">
         {{ editor.titleError }}
       </p>
 
@@ -133,47 +108,25 @@ const handleDelete = async (): Promise<void> => {
           @blur="editor.handleTodoTextBlur"
           @remove="editor.removeTodo"
         />
-        <AppButton
-          class="editor__add"
-          variant="secondary"
-          type="button"
-          @click="editor.addTodo"
-        >
+        <AppButton class="editor__add" variant="secondary" type="button" @click="editor.addTodo">
           Добавить задачу
         </AppButton>
       </section>
 
       <div class="editor__actions">
-        <AppButton
-          variant="secondary"
-          type="button"
-          @click="handleCancelEditing"
-        >
+        <AppButton variant="secondary" type="button" @click="handleCancelEditing">
           Отменить редактирование
         </AppButton>
-        <AppButton
-          v-if="!editor.isNew"
-          variant="danger"
-          type="button"
-          @click="handleDelete"
-        >
+        <AppButton v-if="!editor.isNew" variant="danger" type="button" @click="handleDelete">
           Удалить
         </AppButton>
-        <AppButton
-          type="submit"
-          :disabled="Boolean(editor.saveBlockedMessage)"
-        >
+        <AppButton type="submit" :disabled="Boolean(editor.saveBlockedMessage)">
           Сохранить
         </AppButton>
       </div>
 
-      <p
-        v-if="editor.saveBlockedMessage"
-        class="editor__back"
-      >
-        <NuxtLink to="/">
-          Вернуться к списку
-        </NuxtLink>
+      <p v-if="editor.saveBlockedMessage" class="editor__back">
+        <NuxtLink to="/"> Вернуться к списку </NuxtLink>
       </p>
     </form>
 
@@ -199,7 +152,6 @@ const handleDelete = async (): Promise<void> => {
     />
   </div>
 </template>
-
 
 <style scoped lang="scss">
 .editor__header {

@@ -6,9 +6,8 @@ import { NOTES_STORAGE_KEY, STORAGE_VERSION } from '../types/storage'
 import { nowIso } from '../utils/id'
 import { parseNotesPayload, createLocalStorageAdapter, toStoragePayload } from '../utils/storage'
 
-let notesAdapter: StorageAdapter<StoragePayload> = createLocalStorageAdapter<StoragePayload>(
-  NOTES_STORAGE_KEY
-)
+let notesAdapter: StorageAdapter<StoragePayload> =
+  createLocalStorageAdapter<StoragePayload>(NOTES_STORAGE_KEY)
 
 export const configureNotesStorage = (adapter: StorageAdapter<StoragePayload>): void => {
   notesAdapter = adapter

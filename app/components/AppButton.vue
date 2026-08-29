@@ -1,24 +1,22 @@
 <script setup lang="ts">
 type ButtonVariant = 'primary' | 'secondary' | 'ghost' | 'danger'
 
-withDefaults(defineProps<{
-  variant?: ButtonVariant
-  disabled?: boolean
-  type?: 'button' | 'submit'
-}>(), {
-  variant: 'primary',
-  disabled: false,
-  type: 'button'
-})
+withDefaults(
+  defineProps<{
+    variant?: ButtonVariant
+    disabled?: boolean
+    type?: 'button' | 'submit'
+  }>(),
+  {
+    variant: 'primary',
+    disabled: false,
+    type: 'button'
+  }
+)
 </script>
 
 <template>
-  <button
-    class="app-button"
-    :class="`app-button--${variant}`"
-    :type
-    :disabled
-  >
+  <button class="app-button" :class="`app-button--${variant}`" :type :disabled>
     <slot />
   </button>
 </template>
@@ -35,7 +33,10 @@ withDefaults(defineProps<{
   border-radius: var(--radius-sm);
   cursor: pointer;
   font-weight: 600;
-  transition: background-color 0.15s ease, border-color 0.15s ease, transform 0.15s ease;
+  transition:
+    background-color 0.15s ease,
+    border-color 0.15s ease,
+    transform 0.15s ease;
 }
 
 .app-button:hover:not(:disabled) {

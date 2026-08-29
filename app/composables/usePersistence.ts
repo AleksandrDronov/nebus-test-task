@@ -2,7 +2,6 @@ import type { DraftPayload } from '../types/storage'
 import { DRAFT_STORAGE_KEY, STORAGE_VERSION } from '../types/storage'
 import { createLocalStorageAdapter, parseDraftPayload } from '../utils/storage'
 import { nowIso } from '../utils/id'
-import type { Note } from '../types/note'
 
 const draftAdapter = createLocalStorageAdapter<DraftPayload>(DRAFT_STORAGE_KEY)
 
