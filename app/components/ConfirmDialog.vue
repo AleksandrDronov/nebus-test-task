@@ -15,7 +15,7 @@ const emit = defineEmits<{
 </script>
 
 <template>
-  <AppModal :open="open" :title="title" @close="emit('cancel')">
+  <AppModal :open :title @close="emit('cancel')">
     <p class="confirm-dialog__message">
       {{ message }}
     </p>

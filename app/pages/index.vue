@@ -70,15 +70,15 @@ const handleDelete = async (id: string): Promise<void> => {
         <AppButton @click="handleCreate"> Создать заметку </AppButton>
       </EmptyState>
 
-      <section v-else class="notes-grid" aria-label="Список заметок">
-        <NoteCard
-          v-for="note in notes"
-          :key="note.id"
-          :note="note"
-          @edit="handleEdit(note.id)"
-          @remove="handleDelete(note.id)"
-        />
-      </section>
+      <ul v-else class="notes-grid" aria-label="Список заметок">
+        <li v-for="note in notes" :key="note.id">
+          <NoteCard
+            :note
+            @edit="handleEdit(note.id)"
+            @remove="handleDelete(note.id)"
+          />
+        </li>
+      </ul>
     </main>
 
     <ConfirmDialog
@@ -99,27 +99,17 @@ const handleDelete = async (id: string): Promise<void> => {
   display: flex;
   justify-content: space-between;
   gap: 16px;
-  align-items: flex-end;
+  align-items: center;
   margin-bottom: 28px;
   flex-wrap: wrap;
-}
-
-.page__header h1 {
-  margin: 4px 0 0;
-}
-
-.page__eyebrow {
-  margin: 0;
-  color: var(--color-accent-strong);
-  font-weight: 700;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
-  font-size: 0.78rem;
 }
 
 .notes-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
   gap: 16px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
 }
 </style>
