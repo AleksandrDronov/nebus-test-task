@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { confirmDialogConfig } from '~/config/confirmDialog'
+
 const router = useRouter()
 const store = useNotesStore()
 const { notes } = storeToRefs(store)
@@ -20,13 +22,7 @@ const handleDelete = async (id: string): Promise<void> => {
     id
   )
 
-  const accepted = await confirm({
-    title: 'Удалить заметку?',
-    message: 'Это действие нельзя отменить.',
-    confirmLabel: 'Удалить',
-    cancelLabel: 'Отмена',
-    danger: true
-  })
+  const accepted = await confirm(confirmDialogConfig.deleteNote)
 
   if (!accepted) {
     return
@@ -48,7 +44,9 @@ const handleDelete = async (id: string): Promise<void> => {
   <div class="page">
     <header class="page__header">
       <h1>Все заметки</h1>
-      <AppButton v-if="notes.length > 0" id="create-note-button" @click="handleCreate">Создать заметку</AppButton>
+      <AppButton v-if="notes.length > 0" id="create-note-button" @click="handleCreate"
+        >Создать заметку</AppButton
+      >
     </header>
 
     <main>

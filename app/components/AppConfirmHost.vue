@@ -1,14 +1,6 @@
 <script setup lang="ts">
-const {
-  isOpen,
-  title,
-  message,
-  confirmLabel,
-  cancelLabel,
-  danger,
-  handleConfirm,
-  handleCancel
-} = useConfirmDialog()
+const { isOpen, title, message, confirmLabel, cancelLabel, danger, handleConfirm, handleCancel } =
+  useConfirmDialog()
 </script>
 
 <template>

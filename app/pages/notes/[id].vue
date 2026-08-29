@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { confirmDialogConfig } from '~/config/confirmDialog'
+
 const route = useRoute()
 const noteId = computed(() => String(route.params.id ?? ''))
 
@@ -15,23 +17,7 @@ const handleCancelEditing = async (): Promise<void> => {
     return
   }
 
-  const accepted = await confirm(
-    editor.isNew
-      ? {
-          title: 'Отменить создание?',
-          message: 'Новая заметка не будет сохранена.',
-          confirmLabel: 'Отменить создание',
-          cancelLabel: 'Продолжить создание',
-          danger: true
-        }
-      : {
-          title: 'Отменить редактирование?',
-          message: 'Все несохранённые изменения будут потеряны.',
-          confirmLabel: 'Отменить изменения',
-          cancelLabel: 'Продолжить редактирование',
-          danger: true
-        }
-  )
+  const accepted = await confirm(confirmDialogConfig[editor.isNew ? 'cancelCreate' : 'cancelEdit'])
 
   if (accepted) {
     await editor.cancel(true)
@@ -39,13 +25,7 @@ const handleCancelEditing = async (): Promise<void> => {
 }
 
 const handleDelete = async (): Promise<void> => {
-  const accepted = await confirm({
-    title: 'Удалить заметку?',
-    message: 'Это действие нельзя отменить.',
-    confirmLabel: 'Удалить',
-    cancelLabel: 'Отмена',
-    danger: true
-  })
+  const accepted = await confirm(confirmDialogConfig.deleteNote)
 
   if (accepted) {
     await editor.removeNote()
@@ -67,8 +47,12 @@ const handleDelete = async (): Promise<void> => {
       <header class="editor__header">
         <h1>{{ editor.isNew ? 'Новая заметка' : 'Изменение заметки' }}</h1>
         <div class="editor__toolbar">
-          <AppButton variant="ghost" :disabled="!editor.canUndo" type="button" @click="editor.undo">Отменить</AppButton>
-          <AppButton variant="ghost" :disabled="!editor.canRedo" type="button" @click="editor.redo">Повторить</AppButton>
+          <AppButton variant="ghost" :disabled="!editor.canUndo" type="button" @click="editor.undo"
+            >Отменить</AppButton
+          >
+          <AppButton variant="ghost" :disabled="!editor.canRedo" type="button" @click="editor.redo"
+            >Повторить</AppButton
+          >
         </div>
       </header>
 
@@ -102,13 +86,21 @@ const handleDelete = async (): Promise<void> => {
           @blur="editor.handleTodoTextBlur"
           @remove="editor.removeTodo"
         />
-        <AppButton class="editor__add" variant="secondary" type="button" @click="editor.addTodo">Добавить задачу</AppButton>
+        <AppButton class="editor__add" variant="secondary" type="button" @click="editor.addTodo"
+          >Добавить задачу</AppButton
+        >
       </section>
 
       <div class="editor__actions">
-        <AppButton variant="secondary" type="button" @click="handleCancelEditing">{{ editor.isNew ? 'Отменить' : 'Отменить редактирование' }}</AppButton>
-        <AppButton v-if="!editor.isNew" variant="danger" type="button" @click="handleDelete">Удалить</AppButton>
-        <AppButton type="submit" :disabled="Boolean(editor.saveBlockedMessage)">Сохранить</AppButton>
+        <AppButton variant="secondary" type="button" @click="handleCancelEditing">{{
+          editor.isNew ? 'Отменить' : 'Отменить редактирование'
+        }}</AppButton>
+        <AppButton v-if="!editor.isNew" variant="danger" type="button" @click="handleDelete"
+          >Удалить</AppButton
+        >
+        <AppButton type="submit" :disabled="Boolean(editor.saveBlockedMessage)"
+          >Сохранить</AppButton
+        >
       </div>
 
       <p v-if="editor.saveBlockedMessage" class="editor__back">
@@ -118,10 +110,7 @@ const handleDelete = async (): Promise<void> => {
 
     <ConfirmDialog
       :open="editor.showRestoreDialog"
-      title="Найдено незавершённое редактирование."
-      message="Восстановить черновик?"
-      confirm-label="Восстановить"
-      cancel-label="Отказаться"
+      v-bind="confirmDialogConfig.restoreDraft"
       @confirm="editor.restoreDraftChoice(true)"
       @cancel="editor.restoreDraftChoice(false)"
     />
