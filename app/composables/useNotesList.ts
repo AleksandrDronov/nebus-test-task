@@ -3,9 +3,9 @@ import { useRouter } from 'vue-router'
 import { confirmDialogConfig } from '~/config/confirmDialog'
 import { useNotesStore } from '~/stores/notes'
 import { createEmptyNote } from '~/utils/note'
-import { saveDraft } from '~/utils/persistence'
 import { getFocusTargetAfterDelete, type FocusTargetAfterDelete } from '~/utils/list-focus'
 import { useConfirmDialog } from '~/composables/useConfirmDialog'
+import { useDraftPersistence } from '~/composables/useDraftPersistence'
 
 /**
  * Список заметок на главной странице.
@@ -20,10 +20,11 @@ export const useNotesList = () => {
   const store = useNotesStore()
   const { notes } = storeToRefs(store)
   const { confirm } = useConfirmDialog()
+  const persistence = useDraftPersistence()
 
   const handleCreate = async (): Promise<void> => {
     const note = createEmptyNote()
-    saveDraft({
+    persistence.persistNow({
       noteId: note.id,
       draft: note,
       isNew: true

@@ -1,4 +1,4 @@
-import type { ConfirmOptions } from '~/composables/useConfirmDialog'
+import type { ConfirmOptions } from '~/types/confirm'
 
 export const confirmDialogConfig = {
   cancelCreate: {

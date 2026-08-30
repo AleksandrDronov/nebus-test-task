@@ -1,13 +1,5 @@
 import { ref } from 'vue'
-
-/** Содержимое и оформление модального подтверждения. */
-export type ConfirmOptions = {
-  title: string
-  message: string
-  confirmLabel: string
-  cancelLabel: string
-  danger?: boolean
-}
+import type { ConfirmOptions } from '~/types/confirm'
 
 const isOpen = ref(false)
 const title = ref('')
