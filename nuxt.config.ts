@@ -4,7 +4,12 @@ export default defineNuxtConfig({
   modules: ['@pinia/nuxt', '@nuxt/eslint'],
   css: ['~/assets/styles/main.scss'],
   typescript: {
-    strict: true
+    strict: true,
+    tsConfig: {
+      include: [
+        '../test/**/*'
+      ]
+    }
   },
   app: {
     pageTransition: {
