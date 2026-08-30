@@ -136,6 +136,25 @@ describe('useNoteEditorPage', () => {
     await expect(page.handleLeave()).resolves.toBe(true)
   })
 
+  it('allows leaving without confirm when the note was deleted in another tab', async () => {
+    const store = useNotesStore()
+    store.saveNote({ ...createEmptyNote('n1'), title: 'Saved' })
+    const dialog = useConfirmDialog()
+    const page = useNoteEditorPage('n1')
+
+    page.editor.handleTitleInput('Dirty')
+    store.deleteNote('n1')
+    await page.handleSave()
+
+    expect(page.editor.view).toBe('blocked')
+
+    const pending = page.handleLeave()
+    await Promise.resolve()
+
+    expect(dialog.isOpen.value).toBe(false)
+    await expect(pending).resolves.toBe(true)
+  })
+
   it('closes the restore prompt when leaving the page', async () => {
     const stored = { ...createEmptyNote('n1'), title: 'Saved' }
     const draft = { ...createEmptyNote('n1'), title: 'Unsaved' }

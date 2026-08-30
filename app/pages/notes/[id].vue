@@ -20,13 +20,20 @@ onBeforeRouteLeave(async () => {
       <AppButton to="/">Вернуться к заметкам</AppButton>
     </EmptyState>
 
+    <EmptyState
+      v-else-if="editor.view === 'blocked'"
+      title="Заметка удалена"
+      :message="editor.saveBlockedMessage"
+    >
+      <AppButton to="/">Вернуться к списку</AppButton>
+    </EmptyState>
+
     <NoteEditorForm
-      v-else-if="editor.draft"
+      v-else-if="editor.view === 'editing' && editor.draft"
       :draft="editor.draft"
       :is-new="editor.isNew"
       :title-error="editor.titleError"
       :todo-errors="editor.todoErrors"
-      :save-blocked-message="editor.saveBlockedMessage"
       :can-undo="editor.canUndo"
       :can-redo="editor.canRedo"
       @save="handleSave"

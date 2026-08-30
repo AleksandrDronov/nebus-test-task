@@ -6,7 +6,6 @@ defineProps<{
   isNew: boolean
   titleError: string
   todoErrors: Record<string, string>
-  saveBlockedMessage: string
   canUndo: boolean
   canRedo: boolean
 }>()
@@ -55,10 +54,6 @@ const handleSave = (): void => {
       </div>
     </header>
 
-    <p v-if="saveBlockedMessage" class="editor-form__alert" role="alert">
-      {{ saveBlockedMessage }}
-    </p>
-
     <label class="editor-form__title-field">
       <span>Название</span>
       <input
@@ -101,12 +96,8 @@ const handleSave = (): void => {
       <AppButton v-if="!isNew" variant="danger" type="button" @click="emit('delete')"
         >Удалить</AppButton
       >
-      <AppButton type="submit" :disabled="Boolean(saveBlockedMessage)">Сохранить</AppButton>
+      <AppButton type="submit">Сохранить</AppButton>
     </div>
-
-    <p v-if="saveBlockedMessage" class="editor-form__back">
-      <NuxtLink to="/">Вернуться к списку</NuxtLink>
-    </p>
   </form>
 </template>
 
@@ -154,8 +145,7 @@ const handleSave = (): void => {
   background: #fff;
 }
 
-.editor-form__error,
-.editor-form__alert {
+.editor-form__error {
   margin: 0;
   color: var(--color-danger);
 }
@@ -167,10 +157,6 @@ const handleSave = (): void => {
 .editor-form__actions {
   justify-content: flex-end;
   padding-top: 8px;
-}
-
-.editor-form__back a {
-  color: var(--color-accent-strong);
 }
 
 @media (max-width: 720px) {

@@ -73,6 +73,11 @@ export const useNoteEditorPage = (noteIdSource: MaybeRefOrGetter<string>) => {
       editor.restoreDraft(false)
     }
 
+    if (editor.view === 'blocked') {
+      editor.discard()
+      return true
+    }
+
     if (!editor.isDirty) {
       return true
     }
