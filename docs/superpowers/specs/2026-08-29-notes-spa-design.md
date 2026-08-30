@@ -31,9 +31,12 @@ These are the TZ “на своё усмотрение” choices:
 ```text
 Pinia notes store  ←→  localStorage (versioned payload)
         ↑
-   useNoteEditor (draft + isDirty + save/cancel/delete)
+   useNoteEditor (session + draft + isDirty + save/cancel/delete)
         ↑
-   useUndoRedo (operation stack, limit 50)
+   useNoteHistory (operation stack, limit 50)
+   useHistoryShortcuts (Ctrl/Cmd+Z outside inputs)
+        ↑
+   useNoteEditorPage (confirm, navigation)
         ↑
    pages/notes/[id].vue
 ```
