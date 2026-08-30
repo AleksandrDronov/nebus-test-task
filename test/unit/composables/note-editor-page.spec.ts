@@ -5,8 +5,8 @@ import { useConfirmDialog } from '~/composables/useConfirmDialog'
 import { configureNotesStorage, useNotesStore } from '~/stores/notes'
 import { createMemoryAdapter } from '~/utils/storage'
 import { createEmptyNote } from '~/utils/note'
-import { loadDraftForNote } from '~/utils/persistence'
-import type { StoragePayload } from '~/types/storage'
+import { configureDraftStorage, saveDraft } from '~/utils/persistence'
+import type { DraftPayload, StoragePayload } from '~/types/storage'
 
 const push = vi.fn()
 
@@ -16,19 +16,12 @@ vi.mock('vue-router', () => ({
   })
 }))
 
-vi.mock('~/utils/persistence', () => ({
-  loadDraftForNote: vi.fn(),
-  saveDraft: vi.fn(),
-  clearDraft: vi.fn()
-}))
-
 describe('useNoteEditorPage', () => {
   beforeEach(() => {
     setActivePinia(createPinia())
     configureNotesStorage(createMemoryAdapter<StoragePayload>())
+    configureDraftStorage(createMemoryAdapter<DraftPayload>())
     push.mockReset()
-    vi.mocked(loadDraftForNote).mockReset()
-    vi.mocked(loadDraftForNote).mockReturnValue(null)
   })
 
   it('navigates home after a successful save', async () => {
@@ -56,13 +49,7 @@ describe('useNoteEditorPage', () => {
     const stored = { ...createEmptyNote('n1'), title: 'Saved' }
     const draft = { ...createEmptyNote('n1'), title: 'Unsaved' }
     useNotesStore().saveNote(stored)
-    vi.mocked(loadDraftForNote).mockReturnValue({
-      version: 1,
-      noteId: 'n1',
-      draft,
-      isNew: false,
-      updatedAt: '2026-08-01T00:00:00.000Z'
-    })
+    saveDraft({ noteId: 'n1', draft, isNew: false })
 
     const dialog = useConfirmDialog()
     const page = useNoteEditorPage('n1')
@@ -153,13 +140,7 @@ describe('useNoteEditorPage', () => {
     const stored = { ...createEmptyNote('n1'), title: 'Saved' }
     const draft = { ...createEmptyNote('n1'), title: 'Unsaved' }
     useNotesStore().saveNote(stored)
-    vi.mocked(loadDraftForNote).mockReturnValue({
-      version: 1,
-      noteId: 'n1',
-      draft,
-      isNew: false,
-      updatedAt: '2026-08-01T00:00:00.000Z'
-    })
+    saveDraft({ noteId: 'n1', draft, isNew: false })
 
     const dialog = useConfirmDialog()
     const page = useNoteEditorPage('n1')

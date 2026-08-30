@@ -4,9 +4,9 @@ import { useNoteEditor } from '~/composables/useNoteEditor'
 import { configureNotesStorage, useNotesStore } from '~/stores/notes'
 import { createMemoryAdapter } from '~/utils/storage'
 import { createEmptyNote, createTodo } from '~/utils/note'
-import { loadDraftForNote } from '~/utils/persistence'
+import { configureDraftStorage } from '~/utils/persistence'
 import { TITLE_REQUIRED_MESSAGE } from '~/utils/validation'
-import type { StoragePayload } from '~/types/storage'
+import type { DraftPayload, StoragePayload } from '~/types/storage'
 
 const push = vi.fn()
 
@@ -16,19 +16,12 @@ vi.mock('vue-router', () => ({
   })
 }))
 
-vi.mock('~/utils/persistence', () => ({
-  loadDraftForNote: vi.fn(),
-  saveDraft: vi.fn(),
-  clearDraft: vi.fn()
-}))
-
 describe('useNoteEditor', () => {
   beforeEach(() => {
     setActivePinia(createPinia())
     configureNotesStorage(createMemoryAdapter<StoragePayload>())
+    configureDraftStorage(createMemoryAdapter<DraftPayload>())
     push.mockReset()
-    vi.mocked(loadDraftForNote).mockReset()
-    vi.mocked(loadDraftForNote).mockReturnValue(null)
   })
 
   it('exposes not-found view for an unknown note', () => {

@@ -5,8 +5,8 @@ import { useConfirmDialog } from '~/composables/useConfirmDialog'
 import { configureNotesStorage, useNotesStore } from '~/stores/notes'
 import { createMemoryAdapter } from '~/utils/storage'
 import { createEmptyNote } from '~/utils/note'
-import { saveDraft } from '~/utils/persistence'
-import type { StoragePayload } from '~/types/storage'
+import { configureDraftStorage, loadDraft } from '~/utils/persistence'
+import type { DraftPayload, StoragePayload } from '~/types/storage'
 
 const push = vi.fn()
 
@@ -14,10 +14,6 @@ vi.mock('vue-router', () => ({
   useRouter: () => ({
     push
   })
-}))
-
-vi.mock('~/utils/persistence', () => ({
-  saveDraft: vi.fn()
 }))
 
 const createFocusable = () => ({
@@ -28,8 +24,8 @@ describe('useNotesList', () => {
   beforeEach(() => {
     setActivePinia(createPinia())
     configureNotesStorage(createMemoryAdapter<StoragePayload>())
+    configureDraftStorage(createMemoryAdapter<DraftPayload>())
     push.mockReset()
-    vi.mocked(saveDraft).mockReset()
   })
 
   it('saves a new draft and opens the editor', async () => {
@@ -37,8 +33,7 @@ describe('useNotesList', () => {
 
     await handleCreate()
 
-    expect(saveDraft).toHaveBeenCalledTimes(1)
-    const payload = vi.mocked(saveDraft).mock.calls[0]?.[0]
+    const payload = loadDraft()
     expect(payload?.isNew).toBe(true)
     expect(payload?.noteId).toBe(payload?.draft.id)
     expect(push).toHaveBeenCalledWith(`/notes/${payload?.noteId}`)

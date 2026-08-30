@@ -1,25 +1,17 @@
-import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { beforeEach, describe, expect, it } from 'vitest'
 import { createPinia, setActivePinia } from 'pinia'
 import { useNoteSession } from '~/composables/useNoteSession'
 import { configureNotesStorage, useNotesStore } from '~/stores/notes'
 import { createMemoryAdapter } from '~/utils/storage'
 import { createEmptyNote } from '~/utils/note'
-import { loadDraftForNote, clearDraft } from '~/utils/persistence'
-import type { StoragePayload } from '~/types/storage'
-
-vi.mock('~/utils/persistence', () => ({
-  loadDraftForNote: vi.fn(),
-  clearDraft: vi.fn(),
-  saveDraft: vi.fn()
-}))
+import { configureDraftStorage, loadDraft, saveDraft } from '~/utils/persistence'
+import type { DraftPayload, StoragePayload } from '~/types/storage'
 
 describe('useNoteSession', () => {
   beforeEach(() => {
     setActivePinia(createPinia())
     configureNotesStorage(createMemoryAdapter<StoragePayload>())
-    vi.mocked(loadDraftForNote).mockReset()
-    vi.mocked(clearDraft).mockReset()
-    vi.mocked(loadDraftForNote).mockReturnValue(null)
+    configureDraftStorage(createMemoryAdapter<DraftPayload>())
   })
 
   it('opens an existing note as editing without a restore prompt', () => {
@@ -48,13 +40,7 @@ describe('useNoteSession', () => {
     const stored = { ...createEmptyNote('n1'), title: 'Saved' }
     const draft = { ...createEmptyNote('n1'), title: 'Unsaved' }
     useNotesStore().saveNote(stored)
-    vi.mocked(loadDraftForNote).mockReturnValue({
-      version: 1,
-      noteId: 'n1',
-      draft,
-      isNew: false,
-      updatedAt: '2026-08-01T00:00:00.000Z'
-    })
+    saveDraft({ noteId: 'n1', draft, isNew: false })
 
     const session = useNoteSession('n1')
 
@@ -66,13 +52,7 @@ describe('useNoteSession', () => {
     const stored = { ...createEmptyNote('n1'), title: 'Saved' }
     const draft = { ...createEmptyNote('n1'), title: 'Unsaved' }
     useNotesStore().saveNote(stored)
-    vi.mocked(loadDraftForNote).mockReturnValue({
-      version: 1,
-      noteId: 'n1',
-      draft,
-      isNew: false,
-      updatedAt: '2026-08-01T00:00:00.000Z'
-    })
+    saveDraft({ noteId: 'n1', draft, isNew: false })
 
     const session = useNoteSession('n1')
     session.restoreDraft(true)
@@ -86,31 +66,19 @@ describe('useNoteSession', () => {
     const stored = { ...createEmptyNote('n1'), title: 'Saved' }
     const draft = { ...createEmptyNote('n1'), title: 'Unsaved' }
     useNotesStore().saveNote(stored)
-    vi.mocked(loadDraftForNote).mockReturnValue({
-      version: 1,
-      noteId: 'n1',
-      draft,
-      isNew: false,
-      updatedAt: '2026-08-01T00:00:00.000Z'
-    })
+    saveDraft({ noteId: 'n1', draft, isNew: false })
 
     const session = useNoteSession('n1')
     session.restoreDraft(false)
 
     expect(session.draft.value?.title).toBe('Saved')
     expect(session.needsRestore.value).toBe(false)
-    expect(clearDraft).toHaveBeenCalledTimes(1)
+    expect(loadDraft()).toBeNull()
   })
 
   it('resumes a new note from a creation draft', () => {
     const draft = { ...createEmptyNote('new-1'), title: 'Draft title' }
-    vi.mocked(loadDraftForNote).mockReturnValue({
-      version: 1,
-      noteId: 'new-1',
-      draft,
-      isNew: true,
-      updatedAt: '2026-08-01T00:00:00.000Z'
-    })
+    saveDraft({ noteId: 'new-1', draft, isNew: true })
 
     const session = useNoteSession('new-1')
 

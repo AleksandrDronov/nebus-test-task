@@ -1,18 +1,14 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { useDraftPersistence } from '~/composables/useDraftPersistence'
-import { clearDraft, saveDraft } from '~/utils/persistence'
+import { configureDraftStorage, loadDraft } from '~/utils/persistence'
+import { createMemoryAdapter } from '~/utils/storage'
 import { createEmptyNote } from '~/utils/note'
-
-vi.mock('~/utils/persistence', () => ({
-  saveDraft: vi.fn(),
-  clearDraft: vi.fn()
-}))
+import type { DraftPayload } from '~/types/storage'
 
 describe('useDraftPersistence', () => {
   beforeEach(() => {
     vi.useFakeTimers()
-    vi.mocked(saveDraft).mockReset()
-    vi.mocked(clearDraft).mockReset()
+    configureDraftStorage(createMemoryAdapter<DraftPayload>())
   })
 
   afterEach(() => {
@@ -27,16 +23,14 @@ describe('useDraftPersistence', () => {
     persistence.persistSoon({ noteId: 'n1', draft: first, isNew: true })
     persistence.persistSoon({ noteId: 'n1', draft: second, isNew: true })
 
-    expect(saveDraft).not.toHaveBeenCalled()
+    expect(loadDraft()).toBeNull()
 
     vi.advanceTimersByTime(400)
 
-    expect(saveDraft).toHaveBeenCalledTimes(1)
-    expect(saveDraft).toHaveBeenCalledWith({
-      noteId: 'n1',
-      draft: second,
-      isNew: true
-    })
+    const saved = loadDraft()
+    expect(saved?.noteId).toBe('n1')
+    expect(saved?.draft.title).toBe('Later')
+    expect(saved?.isNew).toBe(true)
   })
 
   it('flushes a pending debounce in persistNow', () => {
@@ -46,15 +40,10 @@ describe('useDraftPersistence', () => {
     persistence.persistSoon({ noteId: 'n1', draft: createEmptyNote('n1'), isNew: false })
     persistence.persistNow({ noteId: 'n1', draft, isNew: false })
 
-    expect(saveDraft).toHaveBeenCalledTimes(1)
-    expect(saveDraft).toHaveBeenCalledWith({
-      noteId: 'n1',
-      draft,
-      isNew: false
-    })
+    expect(loadDraft()?.draft.title).toBe('Now')
 
     vi.advanceTimersByTime(400)
-    expect(saveDraft).toHaveBeenCalledTimes(1)
+    expect(loadDraft()?.draft.title).toBe('Now')
   })
 
   it('discards the pending write and clears storage', () => {
@@ -69,7 +58,6 @@ describe('useDraftPersistence', () => {
 
     vi.advanceTimersByTime(400)
 
-    expect(saveDraft).not.toHaveBeenCalled()
-    expect(clearDraft).toHaveBeenCalledTimes(1)
+    expect(loadDraft()).toBeNull()
   })
 })
