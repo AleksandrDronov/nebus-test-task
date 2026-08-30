@@ -1,7 +1,16 @@
 <script setup lang="ts">
-import { CREATE_NOTE_BUTTON_ID } from '~/utils/list-focus'
+const { notes, handleCreate, handleDelete: deleteNote } = useNotesList()
 
-const { notes, handleCreate, handleDelete } = useNotesList()
+const handleDelete = async (id: string): Promise<void> => {
+  const target = await deleteNote(id)
+
+  if (!target) {
+    return
+  }
+
+  await nextTick()
+  document.getElementById(getFocusElementId(target))?.focus()
+}
 </script>
 
 <template>

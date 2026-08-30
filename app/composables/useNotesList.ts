@@ -1,22 +1,17 @@
-import { nextTick } from 'vue'
 import { storeToRefs } from 'pinia'
 import { useRouter } from 'vue-router'
 import { confirmDialogConfig } from '~/config/confirmDialog'
 import { useNotesStore } from '~/stores/notes'
 import { createEmptyNote } from '~/utils/note'
 import { saveDraft } from '~/utils/persistence'
-import {
-  CREATE_NOTE_BUTTON_ID,
-  getFocusTargetAfterDelete,
-  getNoteCardLinkId
-} from '~/utils/list-focus'
+import { getFocusTargetAfterDelete, type FocusTargetAfterDelete } from '~/utils/list-focus'
 import { useConfirmDialog } from '~/composables/useConfirmDialog'
 
 /**
  * Список заметок на главной странице.
  *
  * Создаёт новую заметку через черновик и удаляет существующую
- * с подтверждением и переносом фокуса на соседнюю карточку.
+ * с подтверждением. Куда перенести фокус, решает страница.
  *
  * @returns список заметок и обработчики создания/удаления
  */
@@ -36,7 +31,7 @@ export const useNotesList = () => {
     await router.push(`/notes/${note.id}`)
   }
 
-  const handleDelete = async (id: string): Promise<void> => {
+  const handleDelete = async (id: string): Promise<FocusTargetAfterDelete | null> => {
     const focusTarget = getFocusTargetAfterDelete(
       notes.value.map((note) => note.id),
       id
@@ -45,18 +40,11 @@ export const useNotesList = () => {
     const accepted = await confirm(confirmDialogConfig.deleteNote)
 
     if (!accepted) {
-      return
+      return null
     }
 
     store.deleteNote(id)
-    await nextTick()
-
-    if (focusTarget.type === 'create') {
-      document.getElementById(CREATE_NOTE_BUTTON_ID)?.focus()
-      return
-    }
-
-    document.getElementById(getNoteCardLinkId(focusTarget.id))?.focus()
+    return focusTarget
   }
 
   return {

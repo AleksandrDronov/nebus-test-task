@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { getFocusTargetAfterDelete } from '~/utils/list-focus'
+import { getFocusElementId, getFocusTargetAfterDelete } from '~/utils/list-focus'
 
 describe('getFocusTargetAfterDelete', () => {
   it('returns the create action when the last note is removed', () => {
@@ -25,5 +25,15 @@ describe('getFocusTargetAfterDelete', () => {
       type: 'note',
       id: 'n2'
     })
+  })
+})
+
+describe('getFocusElementId', () => {
+  it('maps the create target to the create button id', () => {
+    expect(getFocusElementId({ type: 'create' })).toBe('create-note-button')
+  })
+
+  it('maps a note target to the card link id', () => {
+    expect(getFocusElementId({ type: 'note', id: 'n2' })).toBe('note-card-link-n2')
   })
 })

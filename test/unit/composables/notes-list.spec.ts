@@ -16,10 +16,6 @@ vi.mock('vue-router', () => ({
   })
 }))
 
-const createFocusable = () => ({
-  focus: vi.fn()
-})
-
 describe('useNotesList', () => {
   beforeEach(() => {
     setActivePinia(createPinia())
@@ -47,49 +43,38 @@ describe('useNotesList', () => {
 
     const pending = handleDelete('n1')
     dialog.handleCancel()
-    await pending
+    const target = await pending
 
     expect(store.getNote('n1')).toBeDefined()
+    expect(target).toBeNull()
   })
 
-  it('deletes a note and focuses the next card', async () => {
+  it('deletes a note and returns the next card target', async () => {
     const store = useNotesStore()
     store.saveNote({ ...createEmptyNote('n1'), updatedAt: '2026-08-02T00:00:00.000Z' })
     store.saveNote({ ...createEmptyNote('n2'), updatedAt: '2026-08-01T00:00:00.000Z' })
 
-    const nextCard = createFocusable()
-    vi.stubGlobal('document', {
-      getElementById: (id: string) => (id === 'note-card-link-n2' ? nextCard : null)
-    })
-
     const dialog = useConfirmDialog()
     const { handleDelete } = useNotesList()
     const pending = handleDelete('n1')
     dialog.handleConfirm()
-    await pending
+    const target = await pending
 
     expect(store.getNote('n1')).toBeUndefined()
-    expect(nextCard.focus).toHaveBeenCalledTimes(1)
-    vi.unstubAllGlobals()
+    expect(target).toEqual({ type: 'note', id: 'n2' })
   })
 
-  it('focuses the create button after deleting the last note', async () => {
+  it('returns the create target after deleting the last note', async () => {
     const store = useNotesStore()
     store.saveNote(createEmptyNote('n1'))
 
-    const createButton = createFocusable()
-    vi.stubGlobal('document', {
-      getElementById: (id: string) => (id === 'create-note-button' ? createButton : null)
-    })
-
     const dialog = useConfirmDialog()
     const { handleDelete } = useNotesList()
     const pending = handleDelete('n1')
     dialog.handleConfirm()
-    await pending
+    const target = await pending
 
     expect(store.notes).toHaveLength(0)
-    expect(createButton.focus).toHaveBeenCalledTimes(1)
-    vi.unstubAllGlobals()
+    expect(target).toEqual({ type: 'create' })
   })
 })

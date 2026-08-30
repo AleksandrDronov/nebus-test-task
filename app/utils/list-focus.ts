@@ -13,6 +13,14 @@ export type FocusTargetAfterDelete =
       id: string
     }
 
+export const getFocusElementId = (target: FocusTargetAfterDelete): string => {
+  if (target.type === 'create') {
+    return CREATE_NOTE_BUTTON_ID
+  }
+
+  return getNoteCardLinkId(target.id)
+}
+
 export const getFocusTargetAfterDelete = (
   noteIds: string[],
   deletedId: string
