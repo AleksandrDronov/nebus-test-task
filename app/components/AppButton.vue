@@ -1,24 +1,61 @@
 <script setup lang="ts">
+import type { RouteLocationRaw } from 'vue-router'
+import { NuxtLink } from '#components'
+
 type ButtonVariant = 'primary' | 'secondary' | 'ghost' | 'danger'
 
-withDefaults(
+const props = withDefaults(
   defineProps<{
     variant?: ButtonVariant
     disabled?: boolean
     type?: 'button' | 'submit'
+    to?: RouteLocationRaw
   }>(),
   {
     variant: 'primary',
     disabled: false,
-    type: 'button'
+    type: 'button',
+    to: undefined
   }
 )
+
+const isLink = computed(() => props.to !== undefined)
+const rootComponent = computed(() => (isLink.value ? NuxtLink : 'button'))
+
+const rootAttrs = computed(() => {
+  if (isLink.value) {
+    return {
+      to: props.to,
+      'aria-disabled': props.disabled ? true : undefined,
+      tabindex: props.disabled ? -1 : undefined
+    }
+  }
+
+  return {
+    type: props.type,
+    disabled: props.disabled
+  }
+})
+
+const handleClick = (event: MouseEvent) => {
+  if (!isLink.value || !props.disabled) {
+    return
+  }
+
+  event.preventDefault()
+}
 </script>
 
 <template>
-  <button class="app-button" :class="`app-button--${variant}`" :type :disabled>
+  <component
+    :is="rootComponent"
+    class="app-button"
+    :class="`app-button--${variant}`"
+    v-bind="rootAttrs"
+    @click="handleClick"
+  >
     <slot />
-  </button>
+  </component>
 </template>
 
 <style scoped lang="scss">
@@ -33,19 +70,22 @@ withDefaults(
   border-radius: var(--radius-sm);
   cursor: pointer;
   font-weight: 600;
+  text-decoration: none;
   transition:
     background-color 0.15s ease,
     border-color 0.15s ease,
     transform 0.15s ease;
 }
 
-.app-button:hover:not(:disabled) {
+.app-button:hover:not(:disabled):not([aria-disabled='true']) {
   transform: translateY(-1px);
 }
 
-.app-button:disabled {
+.app-button:disabled,
+.app-button[aria-disabled='true'] {
   cursor: not-allowed;
   opacity: 0.5;
+  pointer-events: none;
 }
 
 .app-button--primary {
@@ -53,7 +93,7 @@ withDefaults(
   color: #fff;
 }
 
-.app-button--primary:hover:not(:disabled) {
+.app-button--primary:hover:not(:disabled):not([aria-disabled='true']) {
   background: var(--color-accent-strong);
 }
 
@@ -68,7 +108,7 @@ withDefaults(
   color: var(--color-ink);
 }
 
-.app-button--ghost:hover:not(:disabled) {
+.app-button--ghost:hover:not(:disabled):not([aria-disabled='true']) {
   background: rgba(28, 22, 16, 0.06);
 }
 
@@ -77,7 +117,7 @@ withDefaults(
   color: #fff;
 }
 
-.app-button--danger:hover:not(:disabled) {
+.app-button--danger:hover:not(:disabled):not([aria-disabled='true']) {
   background: var(--color-danger-strong);
 }
 </style>

@@ -17,7 +17,7 @@ onBeforeRouteLeave(async () => {
       title="Заметка не найдена"
       message="Такой заметки нет, либо она была удалена."
     >
-      <AppButton @click="navigateTo('/')">Вернуться к заметкам</AppButton>
+      <AppButton to="/">Вернуться к заметкам</AppButton>
     </EmptyState>
 
     <NoteEditorForm
