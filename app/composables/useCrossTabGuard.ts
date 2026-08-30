@@ -14,27 +14,24 @@ export const NOTE_DELETED_IN_OTHER_TAB_MESSAGE =
  *
  * @param noteId — текущий id заметки
  * @param isNew — создаётся ли заметка в этой сессии
- * @returns флаги блокировки, проверка перед save и обработчик `storage`
+ * @returns сообщение блокировки, проверка перед save и обработчик `storage`
  */
 export const useCrossTabGuard = (noteId: () => string, isNew: Ref<boolean>) => {
   const store = useNotesStore()
-  const deletedInOtherTab = ref(false)
   const saveBlockedMessage = ref('')
 
   const markDeleted = (): void => {
-    deletedInOtherTab.value = true
     saveBlockedMessage.value = NOTE_DELETED_IN_OTHER_TAB_MESSAGE
   }
 
   const reset = (): void => {
-    deletedInOtherTab.value = false
     saveBlockedMessage.value = ''
   }
 
   const checkDeleted = (): boolean => {
     store.load()
 
-    if (deletedInOtherTab.value || (!isNew.value && !store.getNote(noteId()))) {
+    if (saveBlockedMessage.value || (!isNew.value && !store.getNote(noteId()))) {
       markDeleted()
       return true
     }
@@ -51,7 +48,6 @@ export const useCrossTabGuard = (noteId: () => string, isNew: Ref<boolean>) => {
   }
 
   return {
-    deletedInOtherTab,
     saveBlockedMessage,
     checkDeleted,
     handleStorage,

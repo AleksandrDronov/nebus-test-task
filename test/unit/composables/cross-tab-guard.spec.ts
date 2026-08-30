@@ -19,7 +19,6 @@ describe('useCrossTabGuard', () => {
     const guard = useCrossTabGuard(() => 'n1', isNew)
 
     expect(guard.checkDeleted()).toBe(true)
-    expect(guard.deletedInOtherTab.value).toBe(true)
     expect(guard.saveBlockedMessage.value).toContain('удалена в другой вкладке')
   })
 
@@ -41,7 +40,6 @@ describe('useCrossTabGuard', () => {
     store.deleteNote('n1')
     guard.handleStorage({ key: NOTES_STORAGE_KEY } as StorageEvent)
 
-    expect(guard.deletedInOtherTab.value).toBe(true)
     expect(guard.saveBlockedMessage.value).toContain('удалена в другой вкладке')
   })
 
@@ -51,7 +49,6 @@ describe('useCrossTabGuard', () => {
 
     guard.handleStorage({ key: 'other' } as StorageEvent)
 
-    expect(guard.deletedInOtherTab.value).toBe(false)
     expect(guard.saveBlockedMessage.value).toBe('')
   })
 })

@@ -113,14 +113,12 @@ export const useNoteSession = (noteIdSource: MaybeRefOrGetter<string>) => {
   )
 
   return {
-    original,
     draft,
     isNew,
     notFound,
     isReady,
     needsRestore,
     isDirty,
-    initialize,
     restoreDraft,
     resetDraftToOriginal
   }

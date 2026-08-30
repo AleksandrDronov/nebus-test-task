@@ -7,7 +7,7 @@ import { getCurrentInstance, onMounted, onUnmounted, type Ref } from 'vue'
  * @param target — цель события клавиатуры
  * @returns `true`, если это input, textarea или contenteditable
  */
-export const isNativeTextTarget = (target: EventTarget | null): boolean => {
+const isNativeTextTarget = (target: EventTarget | null): boolean => {
   if (!(target instanceof HTMLElement)) {
     return false
   }
