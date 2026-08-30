@@ -11,7 +11,7 @@ import {
 import type { EditorSaveResult, EditorView } from '~/types/editor'
 import { useNotesStore } from '~/stores/notes'
 import { prepareNoteForSave } from '~/utils/validation'
-import { useHistoryShortcuts } from '~/composables/useUndoRedo'
+import { useHistoryShortcuts } from '~/composables/useHistoryShortcuts'
 import { useNoteSession } from '~/composables/useNoteSession'
 import { useNoteHistory } from '~/composables/useNoteHistory'
 import { useDraftPersistence } from '~/composables/useDraftPersistence'

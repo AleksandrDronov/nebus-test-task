@@ -1,31 +1,4 @@
-import { computed, getCurrentInstance, onMounted, onUnmounted, ref, type Ref } from 'vue'
-import { createHistoryManager } from '~/utils/history'
-
-/**
- * Низкоуровневый доступ к менеджеру истории undo/redo.
- *
- * @template T — тип снимка, к которому применяется история
- * @param apply — функция применения следующего снимка к текущему состоянию
- * @returns менеджер истории, флаги canUndo/canRedo и переданная `apply`
- */
-export const useUndoRedo = <T>(apply: (current: T, next: T) => void) => {
-  const history = createHistoryManager()
-  const canUndo = ref(false)
-  const canRedo = ref(false)
-
-  const syncFlags = (): void => {
-    canUndo.value = history.canUndo()
-    canRedo.value = history.canRedo()
-  }
-
-  return {
-    history,
-    canUndo,
-    canRedo,
-    syncFlags,
-    apply
-  }
-}
+import { getCurrentInstance, onMounted, onUnmounted, type Ref } from 'vue'
 
 /**
  * Проверяет, находится ли фокус в нативном текстовом поле.
@@ -94,18 +67,4 @@ export const useHistoryShortcuts = (options: {
   onUnmounted(() => {
     window.removeEventListener('keydown', handleKeydown)
   })
-}
-
-/**
- * Инвертирует флаги истории в `disabled` для кнопок тулбара.
- *
- * @param canUndo — можно ли отменить действие
- * @param canRedo — можно ли повторить действие
- * @returns computed-флаги `undoDisabled` и `redoDisabled`
- */
-export const useCanUndoRedo = (canUndo: Ref<boolean>, canRedo: Ref<boolean>) => {
-  return {
-    undoDisabled: computed(() => !canUndo.value),
-    redoDisabled: computed(() => !canRedo.value)
-  }
 }
