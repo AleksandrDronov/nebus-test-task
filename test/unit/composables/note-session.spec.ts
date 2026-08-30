@@ -36,6 +36,16 @@ describe('useNoteSession', () => {
     expect(session.draft.value).toBeNull()
   })
 
+  it('clears a stale draft when the note no longer exists', () => {
+    const draft = { ...createEmptyNote('gone'), title: 'Orphan' }
+    saveDraft({ noteId: 'gone', draft, isNew: false })
+
+    const session = useNoteSession('gone')
+
+    expect(session.notFound.value).toBe(true)
+    expect(loadDraft()).toBeNull()
+  })
+
   it('asks to restore when a stored draft differs from the note', () => {
     const stored = { ...createEmptyNote('n1'), title: 'Saved' }
     const draft = { ...createEmptyNote('n1'), title: 'Unsaved' }

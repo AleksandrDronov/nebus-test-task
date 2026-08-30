@@ -81,6 +81,10 @@ export const useNoteSession = (noteIdSource: MaybeRefOrGetter<string>) => {
       return
     }
 
+    if (existingDraft) {
+      clearDraft()
+    }
+
     notFound.value = true
     draft.value = null
     original.value = null
