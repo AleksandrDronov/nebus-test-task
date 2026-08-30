@@ -15,7 +15,7 @@ These are the TZ “на своё усмотрение” choices:
 | Topic | Decision |
 | --- | --- |
 | Empty title on save | Trim; if empty, show inline error `Название заметки не может быть пустым.` Do not save. |
-| Empty todos on save | Drop todos whose trimmed text is empty. Do not block save. |
+| Empty todos on save | Trim; if any todo text is empty/whitespace-only, show inline error `Текст задачи не может быть пустым.` Do not save. Do not drop empty todos. |
 | Missing note URL | Not-found state on `/notes/:id` with button `Вернуться к заметкам`. No redirect. |
 | New note | Generate UUID, write an `isNew` draft, open `/notes/:id`. Nothing is added to the persisted notes list until Save. |
 | Todo preview count | First 3 todos on the list page. Checkboxes visible and disabled. |
