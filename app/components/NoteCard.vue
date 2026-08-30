@@ -32,6 +32,8 @@ const displayTitle = computed(() => props.note.title || 'Без названия
 </template>
 
 <style scoped lang="scss">
+@use '../assets/styles/mixins' as *;
+
 .note-card {
   position: relative;
   display: flex;
@@ -73,9 +75,7 @@ const displayTitle = computed(() => props.note.title || 'Без названия
 
 .note-card__title-text {
   display: block;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  @include truncate;
 }
 
 .note-card__empty {

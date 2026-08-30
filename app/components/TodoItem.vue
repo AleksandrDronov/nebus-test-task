@@ -59,6 +59,8 @@ const emit = defineEmits<{
 </template>
 
 <style scoped lang="scss">
+@use '../assets/styles/mixins' as *;
+
 .todo-item {
   display: flex;
   flex-direction: column;
@@ -87,9 +89,7 @@ const emit = defineEmits<{
 }
 
 .todo-item__text {
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  @include truncate;
 }
 
 .todo-item--completed .todo-item__input,

@@ -1,4 +1,5 @@
 @use 'variables' as *;
+@use 'mixins' as *;
 
 :root {
   --color-bg: #{$color-bg};
@@ -58,8 +59,7 @@ button:focus-visible,
 input:focus-visible,
 a:focus-visible,
 [tabindex]:focus-visible {
-  outline: 2px solid var(--color-focus);
-  outline-offset: 2px;
+  @include focus-ring;
 }
 
 .app-shell {
