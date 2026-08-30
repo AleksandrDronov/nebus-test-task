@@ -30,7 +30,9 @@ const getFocusable = (): HTMLElement[] => {
 }
 
 const isActionTarget = (target: EventTarget | null): boolean => {
-  return target instanceof HTMLElement && Boolean(target.closest('button, a[href], [role="button"]'))
+  return (
+    target instanceof HTMLElement && Boolean(target.closest('button, a[href], [role="button"]'))
+  )
 }
 
 const handleKeydown = (event: KeyboardEvent): void => {

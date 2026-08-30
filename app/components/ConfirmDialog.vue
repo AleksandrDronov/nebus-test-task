@@ -20,11 +20,7 @@ const emit = defineEmits<{
       {{ message }}
     </p>
     <div class="confirm-dialog__actions">
-      <AppButton
-        variant="secondary"
-        :data-autofocus="danger || undefined"
-        @click="emit('cancel')"
-      >
+      <AppButton variant="secondary" :data-autofocus="danger || undefined" @click="emit('cancel')">
         {{ cancelLabel }}
       </AppButton>
       <AppButton

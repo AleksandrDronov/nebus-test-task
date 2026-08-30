@@ -6,9 +6,7 @@ export default defineNuxtConfig({
   typescript: {
     strict: true,
     tsConfig: {
-      include: [
-        '../test/**/*'
-      ]
+      include: ['../test/**/*']
     }
   },
   app: {
